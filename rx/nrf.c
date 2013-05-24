@@ -133,7 +133,7 @@ void init_NRF24L01(uchar station)
 	SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, TX_ADR_WIDTH); // 装载通道0的地址，用于ACK
 //*********************************配置NRF24L01**************************************
     SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
-	SPI_write_reg(WRITE_REG + EN_AA, 0x00); //ACK自动应答0通道不允许
+	SPI_write_reg(WRITE_REG + EN_AA, 0x01); //ACK自动应答0通道不允许
 	SPI_write_reg(WRITE_REG + EN_RXADDR, 0x01); // 允许接收地址只有频道0
 	SPI_write_reg(WRITE_REG + SETUP_RETR, 0x00); //取消自动重发功能
 	SPI_write_reg(WRITE_REG + RF_CH, station_R); // 设置信道工作为2.4GHZ，收发必须一致
