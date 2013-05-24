@@ -144,3 +144,19 @@ void init_NRF24L01(uchar station)
     CE(1);
 	usleep(10000); //初始化完成
 }
+
+void print_configs()
+{
+    CE(0);
+#define PCONF(x) printf("%15s   0x%02x\n", #x, SPI_Read(x))
+    PCONF(STATUS);
+    PCONF(EN_AA);
+    PCONF(EN_RXADDR);
+    PCONF(SETUP_RETR);
+    PCONF(RF_CH);
+    PCONF(RX_PW_P0);
+    PCONF(RF_SETUP);
+    PCONF(CONFIG);
+#undef PCONF
+    CE(1);
+}

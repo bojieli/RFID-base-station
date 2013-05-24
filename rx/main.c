@@ -4,6 +4,7 @@
 #include "nrf.h"
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 // received data from nRF24l01
 void on_irq(void)
@@ -44,24 +45,16 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // init with station 10
-    init_NRF24L01(0);
+    int station = 0;
+    if (argc == 2)
+        station = atoi(argv[1]);
+    init_NRF24L01(station & 0x7F); // maximum 127 channels
 
     // set up IRQ
     wiringPiISR(IRQ_PIN, INT_EDGE_FALLING, on_irq);
 
-    printf("Initialized.\n");
-
-    //int i;
-    //for (i=0;i<10;i++) {
-    //uchar tx_buf[10];
-    //nRF24L01_TxPacket(tx_buf);
-    //usleep(10000);
-    //}
-//    while (1) {
-//        on_irq();
-//        usleep(10000);
-//    }
+    printf("Initialized channel %d.\n", station);
+    print_configs();
 
     // infinite wait
     while (1) {
