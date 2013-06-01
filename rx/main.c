@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include "nrf.h"
@@ -7,9 +8,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 static pthread_mutex_t irq_lock;
 struct timeval begin;
+int sockfd; // socket to master
 
 // received data from nRF24l01
 void on_irq(void)
@@ -22,6 +27,12 @@ void on_irq(void)
         return;
 
     if (nRF24L01_RxPacket(buf)) {
+        uchar sockbuf[BUF_SIZE+1] = {0xFF}; // 0xFF is header
+        memcpy(sockbuf+1, buf, BUF_SIZE);
+        if (-1 == send(sockfd, sockbuf, BUF_SIZE+1, 0)) {
+            printf("socket error\n");
+        }
+
         ++total;
         if (buf[BUF_SIZE-1] != 0 && buf[BUF_SIZE-1] != last + 1) {
             ++wrong;
@@ -47,12 +58,34 @@ void on_irq(void)
     pthread_mutex_unlock(&irq_lock);
 }
 
+
+static int init_send()
+{
+    struct sockaddr_in server_addr;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        printf("error creating socket\n");
+        return 1;
+    }
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(12345);
+    inet_aton("127.0.0.1", &server_addr.sin_addr);
+    bzero(&(server_addr.sin_zero), 8);
+    if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
+        printf("error connecting master\n");
+        return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     if (getuid() != 0) {
         printf("You must be superuser!\n");
         return 1;
     }
+    if (init_send())
+        return 1;
 
     pthread_mutex_init(&irq_lock, NULL);
 
