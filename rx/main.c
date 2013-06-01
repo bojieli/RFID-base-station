@@ -14,7 +14,7 @@ struct timeval begin;
 // received data from nRF24l01
 void on_irq(void)
 {
-    static int total = 0, wrong = -1;
+    static int total = 0, wrong = 0;
     static int last = 0;
     uchar buf[BUF_SIZE];
 
@@ -23,20 +23,23 @@ void on_irq(void)
 
     if (nRF24L01_RxPacket(buf)) {
         ++total;
-        int this = (buf[2] << 8) + buf[3];
-        if (buf[3] != 0 && this != last + 1) {
+        if (buf[BUF_SIZE-1] != 0 && buf[BUF_SIZE-1] != last + 1) {
+            ++wrong;
+        }
+        last = buf[BUF_SIZE-1];
+
+        if (total % 1000 == 0) {
             struct timeval now;
             gettimeofday(&now, NULL);
             int total_time = (now.tv_usec - begin.tv_usec) / 1000 + (now.tv_sec - begin.tv_sec) * 1000;
             int i;
             for (i=0; i<BUF_SIZE; i++)
                 printf("%02x ", buf[i]);
-            ++wrong;
             printf("time %6d rate %7d ", total_time, (int)(total*1000000.0/total_time));
             printf("total %d\t wrong %d\t rate %lf\t", total, wrong, wrong * 1.0 / total);
             printf("\n");
+            fflush(stdout);
         }
-        last = this;
     } else {
         printf("Receive failed on IRQ\n");
     }
@@ -68,7 +71,7 @@ int main(int argc, char** argv)
     gettimeofday(&begin, NULL);
     
     // init SPI with channel 0, speed 8M
-    if (wiringPiSPISetup(0, 1000000) == -1) {
+    if (wiringPiSPISetup(0, 8000000) == -1) {
         printf("Cannot initialize SPI\n");
         return 1;
     }
