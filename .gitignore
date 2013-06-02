@@ -1,3 +1,4 @@
 rx/main
 tx/main
+tx/simple
 *.log

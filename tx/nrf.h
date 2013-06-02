@@ -24,9 +24,11 @@ typedef uchar bool;
 #define WRITE_REG   0x20  // Define write command to register，写寄存器指令
 #define RD_RX_PLOAD 0x61  // Define RX payload register address，读取接收数据指令
 #define WR_TX_PLOAD 0xA0  // Define TX payload register address，写待发数据指令
+#define WR_TX_PAYLOAD_NOACK 0XB0
 #define FLUSH_TX    0xE1  // Define flush TX register command，冲洗发送FIFO指令
 #define FLUSH_RX    0xE2  // Define flush RX register command，冲洗接收FIFO指令
 #define REUSE_TX_PL 0xE3  // Define reuse TX payload register command，定义重复装载数据指令
+#define ACTIVATE    0X50  //this write command follow by data 0x73 activate the following featurs 
 #define NOP         0xFF  // Define No Operation, might be used to read status register，保留
 
 #define CONFIG      0x00  // 'Config' register address，配置收发状态，CRC校验模式及收发状态响应方式
@@ -53,13 +55,10 @@ typedef uchar bool;
 #define RX_PW_P4    0x15  // 'RX payload width, pipe4' register address
 #define RX_PW_P5    0x16  // 'RX payload width, pipe5' register address
 #define FIFO_STATUS 0x17  // 'FIFO Status Register' register address
+#define FEATURE     0X1D  //Feature Register
 
-bool nRF24L01_RxPacket(uchar* rx_buf);
 void nRF24L01_TxPacket(uchar* buf);
-void SetRX_Mode(void);
-void SetTX_Mode(void);
 void init_NRF24L01(uchar station);
 void print_configs(void);
-void clear_intr(void);
 
 #endif

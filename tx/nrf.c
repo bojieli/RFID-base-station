@@ -79,8 +79,6 @@ void nRF24L01_TxPacket(uchar *BUF)
     SPI_write_reg(WRITE_REG + STATUS, 0x70); // clear intr
     SPI_write_reg(FLUSH_TX, 0);//清空发送数据缓冲区
     SPI_Write_Buf(WR_TX_PLOAD, BUF, TX_PLOAD_WIDTH);//装载数据
-    //IRQ不屏蔽完成中断响应，16位CRC，发送模式
-    SPI_write_reg(WRITE_REG + CONFIG, 0x7e);
     CE(1);//置高CE，数据开始发送
     usleep(20);//等待数据发送完成
 }
@@ -95,10 +93,8 @@ void init_NRF24L01(uchar station)
 	SPI_write_reg(WRITE_REG + EN_RXADDR, 0x01); // 允许接收地址只有频道0
 	SPI_write_reg(WRITE_REG + SETUP_RETR, 0x00); //取消自动重发功能
 	SPI_write_reg(WRITE_REG + RF_CH, station); // 设置信道工作为2.4GHZ，收发必须一致
-	SPI_write_reg(WRITE_REG + RX_PW_P0, TX_PLOAD_WIDTH); //设置接收数据长度
 	SPI_write_reg(WRITE_REG + RF_SETUP, 0x07); //设置发射速率为1MHZ，发射功率为最大值0dB
     SPI_write_reg(WRITE_REG + CONFIG, 0x7e); // IRQ发送模式
-    flush_rx();
     CE(1);
 	usleep(10000); //初始化完成
 }
