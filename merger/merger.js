@@ -24,28 +24,30 @@ var REQUEST_TIMEOUT = 3000;
 var REQUEST_MIN_INTERVAL = 500;
 
 var sending_timer = null;
-function reset_sending_timer() {
-    if (sending_timer) {
-        set_sending_timer();
-    } else {
-        send_to_server();
-    }
-}
-function set_sending_timer() {
+function on_sending_timeout() {
     clearTimeout(sending_timer);
-    sending_timer = setTimeout(reset_sending_timer, REQUEST_TIMEOUT);
+    sending_timer = null;
+    send_to_server();
+}
+function reset_sending_timer() {
+    clearTimeout(sending_timer);
+    sending_timer = setTimeout(on_sending_timeout, REQUEST_TIMEOUT);
 }
 
 var sending_queue;
 var request_queue = [];
 function send_to_server() {
+try {
+    if (sending_timer)
+        return;
     sending_queue = sending_queue.concat(request_queue);
     request_queue = [];
     if (sending_queue.length == 0)
-        return;
+        return; // if there is nothing to send, do not set the timer
+    reset_sending_timer();
     var post_data = querystring.stringify({
         token: ACCESS_TOKEN,
-        data: json_encode(sending_queue),
+        data: JSON.stringify(sending_queue),
     });
     REMOTE_SERVER.headers['Content-Length'] = post_data.length;
     var req = http.request(REMOTE_SERVER, function(res) {
@@ -55,18 +57,19 @@ function send_to_server() {
         } else {
             console.log('HTTP error status: ' + res.statusCode);
         }
-        // prevent too frequent requests
-        setTimeout(reset_sending_timer, REQUEST_MIN_INTERVAL);
+        // wait a minute to clear the timer to prevent too frequent requests
+        setTimeout(on_sending_timeout, REQUEST_MIN_INTERVAL);
     });
     req.write(post_data);
     req.end();
+} catch(e) {
+    console.log('Exception in send_to_server:');
+    console.log(e);
+}
 }
 function notify(no, direction) {
     request_queue.push([no, direction]);
-    if (!sending_timer) {
-        set_sending_timer();
-        send_to_server();
-    }
+    send_to_server();
 }
 function notify_out(no) {
     notify(no, 0);
@@ -82,6 +85,7 @@ function reset_student(no) {
         students[no] = undefined;
 }
 function handle_packet(no, action) {
+    debug_packet(no);
     var state_table = [
         [undefined, 1, 2],
         [undefined, 1, 3],
@@ -113,20 +117,18 @@ try {
 net.createServer(function(sock) {
     console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
     var action = sock.remoteAddress == '127.0.0.1' ? 1 : 2;
-    var buf = '';
-    sock.on('data', function(data) {
+    var packet = [];
+    sock.on('data', function(buf) {
     try {
-        buf += data;
-        var packets = buf.split(chr(SPLIT_CHAR));
-        for (i in packets) {
-            if (packets[i].length == PAYLOAD_LENGTH)
-                handle_packet(packets[i], action);
-            // otherwise drop the packet
-        }
-        if (packets[packets.length-1].length != PAYLOAD_LENGTH) { // in case the last packet is not complete
-            buf = packets[packets.length-1];
-        } else {
-            buf = '';
+        var i;
+        for (i=0; i<buf.length; i++) {
+            if (buf[i] == SPLIT_CHAR) {
+                packet = [];
+            } else {
+                packet.push(buf[i]);
+                if (packet.length == PAYLOAD_LENGTH)
+                    handle_packet(buffer_stringify(packet), action);
+            }
         }
     } catch(e) {
         console.log('Exception in data parsing:');
@@ -139,3 +141,26 @@ net.createServer(function(sock) {
 }).listen(LISTEN_PORT, LISTEN_HOST);
 
 console.log('Server listening on ' + LISTEN_HOST + ':' + LISTEN_PORT);
+
+function buffer_stringify(arr) {
+    var i, hex = '';
+    for (i=0; i<arr.length; i++)
+        hex += arr[i].toString(16);
+    return hex;
+}
+
+
+var debug_packet = (function(){
+    var counter = 0;
+    var errors = 0;
+    var last = 255;
+    return function(no) {
+        ++counter;
+        var curr = parseInt(no.substr(-2, 2), 16);
+        if (curr != 0 && last + 1 != curr)
+            ++errors;
+        last = curr;
+        if (counter % 1000 == 0)
+            console.log('total ' + counter + ', errors ' + errors + ', rate ' + errors/counter);
+    }
+})();
