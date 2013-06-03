@@ -148,6 +148,7 @@ void init_NRF24L01(uchar station)
 void print_configs()
 {
     CE(0);
+    SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
 #define PCONF(x) printf("%15s   0x%02x\n", #x, SPI_Read(x))
     PCONF(STATUS);
     PCONF(EN_AA);
