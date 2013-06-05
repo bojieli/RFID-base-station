@@ -28,7 +28,8 @@ static void batch(uchar* buf)
 {
     static int total = 0, wrong = 0;
     static int last = 0;
-    static int last_time = 0;
+    static int last_time = 0, led_last_time = 0;
+    static bool led = false;
     ++total;
     if (buf[BUF_SIZE-1] != 0 && buf[BUF_SIZE-1] != last + 1) {
         ++wrong;
@@ -39,6 +40,11 @@ static void batch(uchar* buf)
         struct timeval now;
         gettimeofday(&now, NULL);
         int total_time = (now.tv_usec - begin.tv_usec) / 1000 + (now.tv_sec - begin.tv_sec) * 1000;
+        if (total_time - led_last_time > 300) {
+            led = led ? false : true;
+            digitalWrite(LED_PIN, led);
+            led_last_time = total_time;
+        }
         print_buf(buf);
         printf("time %6d diff %6d rate %7d ", total_time, total_time - last_time, (int)(total*1000000.0/total_time));
         last_time = total_time;
@@ -114,6 +120,7 @@ int main(int argc, char** argv)
 
     pinMode(CE_PIN, OUTPUT);
     pinMode(CSN_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
 
     pinMode(IRQ_PIN, INPUT);
     pullUpDnControl(IRQ_PIN, PUD_UP);
