@@ -44,11 +44,12 @@ int main(int argc, char** argv)
     gettimeofday(&begin, NULL);
     int counter = 0;
     while (1) {
-        id = atoi(argv[2]) & 0xFFFF;
+        id = rand() & 0xFFFF;
         buf[2] = id >> 8;
         buf[3] = id & 0xFF;
         buf[4] = 0xc0;
         buf[5] = 1<<(rand() % 6);
+        //buf[8] = counter % 256;
         
         nRF24L01_TxPacket(buf);
         // buffer is invalid now

@@ -10,6 +10,8 @@ uchar TX_ADDRESS[TX_ADR_WIDTH] = {0xff,0xff,0xff,0xff,0xff};//本地地址
 #define TX_DS	sta&(1<<5)
 #define MAX_RT 	sta&(1<<4)
 
+#define SLEEP_TIMEOUT 800
+
 /* @brief   write a byte to SPI channel 0
  * @param   value: value
  */
@@ -80,7 +82,7 @@ void nRF24L01_TxPacket(uchar *BUF)
     SPI_write_reg(FLUSH_TX, 0);//清空发送数据缓冲区
     SPI_Write_Buf(WR_TX_PLOAD, BUF, TX_PLOAD_WIDTH);//装载数据
     CE(1);//置高CE，数据开始发送
-    usleep(20);//等待数据发送完成
+    usleep(SLEEP_TIMEOUT);//等待数据发送完成
 }
 
 void init_NRF24L01(uchar station)
