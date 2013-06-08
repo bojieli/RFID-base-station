@@ -120,8 +120,8 @@ void nRF24L01_TxPacket(uchar *BUF)
     
     //IRQ不屏蔽完成中断响应，16位CRC，发送模式
     SPI_write_reg(WRITE_REG + CONFIG, 0x0e);
+    usleep(10);//等待数据发送完成
     CE(1);//置高CE，数据开始发送
-    usleep(20);//等待数据发送完成
 }
 
 void init_NRF24L01(uchar station)
@@ -129,26 +129,26 @@ void init_NRF24L01(uchar station)
 	station_T=station;
     station_R=station;
 	CE(0); // 拉低CE,NRF24C01使能
+    SPI_write_reg(WRITE_REG + CONFIG, 0x7f); // 屏蔽所有中断
+    SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
 	SPI_Write_Buf(WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); // 写本地地址
 	SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, TX_ADR_WIDTH); // 装载通道0的地址，用于ACK
 //*********************************配置NRF24L01**************************************
-    SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
 	SPI_write_reg(WRITE_REG + EN_AA, 0x01); //ACK自动应答0通道不允许
 	SPI_write_reg(WRITE_REG + EN_RXADDR, 0x01); // 允许接收地址只有频道0
 	SPI_write_reg(WRITE_REG + SETUP_RETR, 0x00); //取消自动重发功能
 	SPI_write_reg(WRITE_REG + RF_CH, station_R); // 设置信道工作为2.4GHZ，收发必须一致
 	SPI_write_reg(WRITE_REG + RX_PW_P0, TX_PLOAD_WIDTH); //设置接收数据长度
 	SPI_write_reg(WRITE_REG + RF_SETUP, 0x07); //设置发射速率为1MHZ，发射功率为最大值0dB
-    SPI_write_reg(WRITE_REG + CONFIG, 0x0f); // IRQ收发完成中断响应，16位CRC 
     flush_rx();
-    CE(1);
+    SPI_write_reg(WRITE_REG + CONFIG, 0x0f); // IRQ收发完成中断响应，16位CRC 
 	usleep(10000); //初始化完成
+    CE(1);
 }
 
 void print_configs()
 {
     CE(0);
-    SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
 #define PCONF(x) printf("%15s   0x%02x\n", #x, SPI_Read(x))
     PCONF(STATUS);
     PCONF(EN_AA);
@@ -159,5 +159,6 @@ void print_configs()
     PCONF(RF_SETUP);
     PCONF(CONFIG);
 #undef PCONF
+    usleep(10);
     CE(1);
 }
