@@ -46,22 +46,28 @@ int http_send(char* buf, size_t len, char** recvbuf) {
     server_addr.sin_port = htons(80);
     struct hostent *he = gethostbyname(REMOTE_HOST);
     IF_ERROR((he == NULL ? -1 : 0), "gethostbyname")
-    server_addr.sin_addr.s_addr = htons(inet_addr(he->h_addr_list[0]));
+    memcpy(&server_addr.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
     bzero(&(server_addr.sin_zero), 8);
     IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
 
-#define MAX_HEADERS_LENGTH 200
+#define MAX_HEADERS_LENGTH 300
+    char *body = malloc(len + MAX_HEADERS_LENGTH);
+    snprintf(body, len + MAX_HEADERS_LENGTH,
+        "token=" ACCESS_TOKEN "&data=%s", buf);
     char *tcp = malloc(len + MAX_HEADERS_LENGTH);
     snprintf(tcp, len + MAX_HEADERS_LENGTH,
         HTTP_METHOD " " REMOTE_PATH " HTTP/1.1\r\n"
         "Host: " REMOTE_HOST "\r\n"
         "User-Agent: merger/" UA_VERSION "\r\n"
         "Connection: close\r\n"
-        "\r\n"
-        "token=" ACCESS_TOKEN "&data=%s",
-        buf);
+        "Content-Length: %d\r\n"
+        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "\r\n%s",
+        strlen(body), body);
+    free(body);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
+    free(tcp);
 
 #define BUF_SIZE 1024
     int totalbytes = 0;

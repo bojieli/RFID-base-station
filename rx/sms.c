@@ -63,7 +63,6 @@ int http_send(char* msg) {
 #define MAX_HEADERS_LENGTH 300
     int len = strlen(msg);
     char *body = malloc(len + MAX_HEADERS_LENGTH);
-    bzero(body, len + MAX_HEADERS_LENGTH);
     snprintf(body, len + MAX_HEADERS_LENGTH,
         "token=" SMS_TOKEN "&msg=%s&mobile=" MOBILE_NUMBER,
         msg);
@@ -77,9 +76,11 @@ int http_send(char* msg) {
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n%s",
         strlen(body), body);
+    free(body);
     //printf("send:\n%s\n", tcp);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
+    free(tcp);
 
     int recvbytes = 0;
 #define BUF_SIZE 1000
@@ -88,7 +89,6 @@ int http_send(char* msg) {
         recvbytes = recv(sockfd, received, BUF_SIZE, 0);
     //printf("received:\n%s\n", received);
     close(sockfd);
-    free(tcp);
     return 0;
 }
 
