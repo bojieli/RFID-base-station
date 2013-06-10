@@ -5,6 +5,7 @@
 #define CSN_PIN 4
 #define CE_PIN 10
 #define LED_PIN 0
+#define LED2_PIN 2
 
 typedef unsigned char uchar;
 typedef uchar bool;
