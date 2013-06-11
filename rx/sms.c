@@ -8,12 +8,14 @@
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#define IF_ERROR(expr,msg) if ((expr) == -1) { fprintf(stderr, "[%d] " msg "\n", errno); return 1; }
 
 #include "sms.h"
 
+#define IF_ERROR(expr,msg) if ((expr) == -1) { fprintf(stderr, "[%d] " msg "\n", errno); return 1; }
+#define MAX_HEADERS_LENGTH 300
+
 // receive until error or filled up the buffer
-int recvn(int fd, void* buf, size_t size) {
+static int recvn(int fd, void* buf, size_t size) {
     int recvtotal = 0;
     while (recvtotal < size) {
         int recvlen = recv(fd, buf, size - recvtotal, 0);
@@ -31,7 +33,7 @@ int recvn(int fd, void* buf, size_t size) {
 }
 
 // send until error or all sent
-int sendn(int fd, void* buf, size_t size) {
+static int sendn(int fd, void* buf, size_t size) {
     int sendtotal = 0;
     while (sendtotal < size) {
         int sendlen = send(fd, buf, size - sendtotal, 0);
@@ -48,7 +50,7 @@ int sendn(int fd, void* buf, size_t size) {
     return sendtotal;
 }
 
-int http_send(char* msg) {
+static int http_send(char* body) {
     struct sockaddr_in server_addr;
     int sockfd;
     IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
@@ -60,14 +62,9 @@ int http_send(char* msg) {
     bzero(&(server_addr.sin_zero), 8);
     IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
 
-#define MAX_HEADERS_LENGTH 300
-    int len = strlen(msg);
-    char *body = malloc(len + MAX_HEADERS_LENGTH);
-    snprintf(body, len + MAX_HEADERS_LENGTH,
-        "token=" SMS_TOKEN "&msg=%s&mobile=" MOBILE_NUMBER,
-        msg);
-    char *tcp = malloc(len + MAX_HEADERS_LENGTH);
-    snprintf(tcp, len + MAX_HEADERS_LENGTH,
+    int alloc_size = strlen(body) + MAX_HEADERS_LENGTH;
+    char *tcp = malloc(alloc_size);
+    snprintf(tcp, alloc_size,
         HTTP_METHOD " " REMOTE_PATH " HTTP/1.0\r\n"
         "Host: " REMOTE_HOST "\r\n"
         "User-Agent: rfid/" UA_VERSION "\r\n"
@@ -76,7 +73,6 @@ int http_send(char* msg) {
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n%s",
         strlen(body), body);
-    free(body);
     //printf("send:\n%s\n", tcp);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
@@ -92,7 +88,7 @@ int http_send(char* msg) {
     return 0;
 }
 
-void sms_send(char* msg) {
+static char* urlencode(char* msg) {
     char* buf = malloc(strlen(msg) * 3 + 1);
     char* cur = buf;
     const char hexchars[17] = "0123456789abcdef";
@@ -109,6 +105,17 @@ void sms_send(char* msg) {
         msg++;
     }
     *cur = '\0';
-    http_send(buf);
-    free(buf);
+    return buf;
+}
+
+void sms_send(char* msg, char* mobile_number) {
+    char *encode_msg = urlencode(msg);
+    char *encode_mobile = urlencode(mobile_number);
+    int alloc_size = strlen(encode_msg) + strlen(encode_mobile) + MAX_HEADERS_LENGTH;
+    char *body = malloc(alloc_size);
+    snprintf(body, alloc_size, "token=" SMS_TOKEN "&msg=%s&mobile=%s", encode_msg, encode_mobile);
+    http_send(body);
+    free(body);
+    free(encode_mobile);
+    free(encode_msg);
 }

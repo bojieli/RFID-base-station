@@ -14,13 +14,15 @@
 #include "sms.h"
 
 #define BLINK_INTERVAL 100 // in ms
-#define MULTIPLE_SEND_INTERVAL 5000 // in ms
+#define MULTIPLE_SEND_INTERVAL 10000 // in ms
 
 static pthread_mutex_t irq_lock;
 struct timeval begin;
 int sockfd; // socket to master
 int batch_count = 0;
 bool test_multiple_mode = false;
+bool sms_active = false;
+char *mobile_number = NULL;
 
 static void print_buf(uchar* buf)
 {
@@ -81,6 +83,7 @@ static void test_multiple(uchar* buf)
             printf("invalid packet: ");
             print_buf(buf);
             printf("\n");
+            fflush(stdout);
             return;
         }
     uchar no = buf[BUF_SIZE-1];
@@ -94,10 +97,10 @@ static void test_multiple(uchar* buf)
                 printf("%d:%d ", i, counter[i]);
                 if (counter[i] == 0) {
                     printf("[number %d miss]  ", i);
-                    if (!errored[i]) {
+                    if (sms_active && !errored[i]) {
                         char buf[100];
                         sprintf(buf, "RFID Number %d miss [5005]\n", i);
-                        sms_send(buf);
+                        sms_send(buf, mobile_number);
                     }
                     errored[i] = true;
                 }
@@ -106,6 +109,7 @@ static void test_multiple(uchar* buf)
             counter[i] = 0;
         }
         printf("\n");
+        fflush(stdout);
         if (error_flag) {
             digitalWrite(LED2_PIN, (led = ~led));
         }
@@ -205,7 +209,7 @@ int main(int argc, char** argv)
         station = atoi(argv[1]);
     init_NRF24L01(station & 0x7F); // maximum 127 channels
 
-    if (argc == 3) {
+    if (argc >= 3) {
         if (strcmp(argv[2], "-m") == 0)
             test_multiple_mode = true;
         else
@@ -214,8 +218,15 @@ int main(int argc, char** argv)
     else
         batch_count = 0;
 
+    if (argc >= 5 && strcmp(argv[3], "-n") == 0) {
+        sms_active = true;
+        mobile_number = argv[4];
+    }
+
     char* msg = malloc(100);
-    sprintf(msg, "Initialized channel %d in %s mode.\n", station, test_multiple_mode ? "test multiple" : (batch_count ? "batch" : "single"));
+    sprintf(msg, "Initialized channel %d in %s mode%s.\n", station,
+        test_multiple_mode ? "test multiple" : (batch_count ? "batch" : "single"),
+        sms_active ? " with sms notify" : "");
     printf("%s", msg);
     //sms_send(msg);
     free(msg);

@@ -159,6 +159,7 @@ void print_configs()
     PCONF(RF_SETUP);
     PCONF(CONFIG);
 #undef PCONF
+    fflush(stdout);
     usleep(10);
     CE(1);
 }
