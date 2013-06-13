@@ -14,7 +14,8 @@
 #include "sms.h"
 
 #define BLINK_INTERVAL 100 // in ms
-#define MULTIPLE_SEND_INTERVAL 10000 // in ms
+#define MULTIPLE_SEND_INTERVAL 3000 // in ms
+#define SMS_MAXNUM 4 // each RFID cannot send more than SMS_MAXNUM messages
 
 static pthread_mutex_t irq_lock;
 struct timeval begin;
@@ -72,7 +73,8 @@ static void test_multiple(uchar* buf)
 {
     static int total[256] = {0};
     static int counter[256] = {0};
-    static bool errored[256] = {0};
+    static bool died[256] = {0};
+    static int sms_count[256] = {0};
     static int last_time = 0;
     struct timeval now;
     gettimeofday(&now, NULL);
@@ -89,30 +91,34 @@ static void test_multiple(uchar* buf)
     uchar no = buf[BUF_SIZE-1];
     ++total[no];
     ++counter[no];
-    bool error_flag = false;
-    static bool led = false;
     if (curr_time - last_time > MULTIPLE_SEND_INTERVAL) {
+        bool error_flag = false;
         for (i=0; i<256; i++) {
             if (total[i]) {
                 printf("%d:%d ", i, counter[i]);
                 if (counter[i] == 0) {
                     printf("[number %d miss]  ", i);
-                    if (sms_active && !errored[i]) {
+                    if (sms_active && !died[i] && sms_count[i]++ < SMS_MAXNUM) {
                         char buf[100];
                         sprintf(buf, "RFID Number %d miss [5005]\n", i);
                         sms_send(buf, mobile_number);
                     }
-                    errored[i] = true;
+                    died[i] = true;
+                    error_flag = true;
+                } else {
+                    if (sms_active && died[i] && sms_count[i]++ < SMS_MAXNUM) {
+                        char buf[100];
+                        sprintf(buf, "RFID Number %d is OK [5005]\n", i);
+                        sms_send(buf, mobile_number);
+                    }
+                    died[i] = false;
                 }
-                error_flag = true;
             }
             counter[i] = 0;
         }
         printf("\n");
         fflush(stdout);
-        if (error_flag) {
-            digitalWrite(LED2_PIN, (led = ~led));
-        }
+        digitalWrite(LED2_PIN, error_flag);
         last_time = curr_time;
     }
 }
