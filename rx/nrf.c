@@ -129,6 +129,7 @@ void init_NRF24L01(uchar station)
 	station_T=station;
     station_R=station;
 	CE(0); // 拉低CE,NRF24C01使能
+begin:
     SPI_write_reg(WRITE_REG + CONFIG, 0x7f); // 屏蔽所有中断
     SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
 	SPI_Write_Buf(WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); // 写本地地址
@@ -143,12 +144,15 @@ void init_NRF24L01(uchar station)
     flush_rx();
     SPI_write_reg(WRITE_REG + CONFIG, 0x0f); // IRQ收发完成中断响应，16位CRC 
 	usleep(10000); //初始化完成
+    if (SPI_Read(CONFIG) != 0x0f)
+        goto begin;
     CE(1);
 }
 
 void print_configs()
 {
     CE(0);
+    SPI_write_reg(WRITE_REG + STATUS, 0x70); //清中断标志位
 #define PCONF(x) printf("%15s   0x%02x\n", #x, SPI_Read(x))
     PCONF(STATUS);
     PCONF(EN_AA);
@@ -160,6 +164,5 @@ void print_configs()
     PCONF(CONFIG);
 #undef PCONF
     fflush(stdout);
-    usleep(10);
     CE(1);
 }
