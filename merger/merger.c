@@ -23,6 +23,11 @@ static void* init_sender_helper(void* arg) {
 }
 
 int main() {
+    if (!load_config()) {
+        printf("config file does not exist");
+        return 1;
+    }
+
     pthread_mutex_init(&lock_notify_queue, NULL);
     pthread_mutex_init(&lock_timers, NULL);
     pthread_mutex_init(&lock_threads_running, NULL);

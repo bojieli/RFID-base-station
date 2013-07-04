@@ -27,8 +27,8 @@ static int msg_loop() {
         int i;
         for (i=0; i<2; i++) {
             if (fds[i].revents & POLLIN) {
-                char* buf = malloc(PACKET_SIZE);
-                int readlen = recvn(clientfds[i], buf, PACKET_SIZE);
+                char* buf = malloc(atoi(get_config("student.packet_size")));
+                int readlen = recvn(clientfds[i], buf, atoi(get_config("student.packet_size")));
                 if (readlen == -1) {
                     fprintf(stderr, "Error: read from %s\n", i ? "slave" : "master");
                     return -1;
@@ -49,8 +49,8 @@ int init_server()
     struct sockaddr_in myaddr;
     IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     myaddr.sin_family = AF_INET;
-    myaddr.sin_port = htons(LISTEN_PORT);
-    myaddr.sin_addr.s_addr = inet_addr(LISTEN_HOST);
+    myaddr.sin_port = htons(atoi(get_config("listen.port")));
+    myaddr.sin_addr.s_addr = inet_addr(get_config("listen.host"));
     bzero(&(myaddr.sin_zero), 8);
     IF_ERROR(bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr)), "bind")
     IF_ERROR(listen(sockfd, 10), "listen")
