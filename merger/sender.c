@@ -29,7 +29,7 @@ static void commit_notify_queue() {
 
 send: {
     char* recv_buf = NULL;
-    if (http_send(send_buf, notify_queue_len*2, &recv_buf) > 0 && strcmp(recv_buf, "OK") == 0) {
+    if (http_send(send_buf, notify_queue_len*2, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
         free(send_buf);
         send_buf = NULL;
     }
@@ -39,7 +39,7 @@ send: {
 int init_sender() {
     while (1) {
         commit_notify_queue();
-        sleep(REQUEST_INTERVAL); // sleep to prevent from exhausting the server
+        sleep(atoi(get_config("cloud.request_interval"))); // sleep to prevent from exhausting the server
     }
 }
 

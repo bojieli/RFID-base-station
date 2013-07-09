@@ -43,8 +43,8 @@ int http_send(char* buf, size_t len, char** recvbuf) {
     int sockfd;
     IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(80);
-    struct hostent *he = gethostbyname(REMOTE_HOST);
+    server_addr.sin_port = htons(atoi(get_config("cloud.remote_port")));
+    struct hostent *he = gethostbyname(get_config("cloud.remote_host"));
     IF_ERROR((he == NULL ? -1 : 0), "gethostbyname")
     memcpy(&server_addr.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
     bzero(&(server_addr.sin_zero), 8);
@@ -53,16 +53,22 @@ int http_send(char* buf, size_t len, char** recvbuf) {
 #define MAX_HEADERS_LENGTH 300
     char *body = malloc(len + MAX_HEADERS_LENGTH);
     snprintf(body, len + MAX_HEADERS_LENGTH,
-        "token=" ACCESS_TOKEN "&data=%s", buf);
+        "token=%s&data=%s",
+        get_config("cloud.access_token"),
+        buf);
     char *tcp = malloc(len + MAX_HEADERS_LENGTH);
     snprintf(tcp, len + MAX_HEADERS_LENGTH,
-        HTTP_METHOD " " REMOTE_PATH " HTTP/1.1\r\n"
-        "Host: " REMOTE_HOST "\r\n"
-        "User-Agent: merger/" UA_VERSION "\r\n"
+        "%s %s HTTP/1.1\r\n"
+        "Host: %s\r\n"
+        "User-Agent: %s\r\n"
         "Connection: close\r\n"
         "Content-Length: %d\r\n"
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n%s",
+        get_config("cloud.http_method"),
+        get_config("cloud.remote_path"),
+        get_config("cloud.remote_host"),
+        get_config("cloud.user_agent"),
         strlen(body), body);
     free(body);
 

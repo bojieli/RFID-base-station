@@ -4,6 +4,8 @@ char *notify_queue = NULL;
 int notify_queue_len = 0;
 int notify_queue_alloc_size = 0;
 
+#define REQUEST_SIZE (atoi(get_config("student.id_size")) * 2)
+
 static void notify(char* student_no, bool action) {
     pthread_mutex_lock(&lock_notify_queue);
 
@@ -11,8 +13,8 @@ static void notify(char* student_no, bool action) {
         notify_queue_alloc_size = (notify_queue_alloc_size + REQUEST_SIZE) * 2;
         notify_queue = realloc(notify_queue, notify_queue_alloc_size);
     }
-    memcpy(notify_queue + notify_queue_len, student_no, STUDENT_NO_SIZE);
-    notify_queue[notify_queue_len + STUDENT_NO_SIZE] = action;
+    memcpy(notify_queue + notify_queue_len, student_no, atoi(get_config("student.id_size")));
+    notify_queue[notify_queue_len + atoi(get_config("student.id_size"))] = action;
     notify_queue_len += REQUEST_SIZE;
 
     pthread_mutex_unlock(&lock_notify_queue);
@@ -38,7 +40,7 @@ static void check_timers() {
     dict prev_timer = timers;
     while (prev_timer->next != NULL) {
         dict timer = prev_timer->next;
-        if (curr_time - timer->value >= STUDENT_TIMEOUT) {
+        if (curr_time - timer->value >= atoi(get_config("student.timeout"))) {
             int curr_state = get(students, timer->key);
             set(students, timer->key, 0); // goto state 0
             if (curr_state == 3 || curr_state == 4) {

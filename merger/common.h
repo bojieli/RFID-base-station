@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <pthread.h>
+#include <ctype.h>
 
 #define IF_ERROR(expr,msg) if ((expr) == -1) { fprintf(stderr, "[%d] " msg "\n", errno); return 1; }
 #define debug printf
@@ -20,8 +21,6 @@
 #define bool unsigned char
 #define true 1
 #define false 0
-
-#include "config.h"
 
 // notify queue: timeout enqueue, sender dequeue
 extern pthread_mutex_t lock_notify_queue;
@@ -63,5 +62,9 @@ bool del(dict d, char* key);
 int recvn(int fd, void* buf, size_t size);
 int sendn(int fd, void* buf, size_t size);
 int http_send(char* buf, size_t len, char** recvbuf);
+
+// config.c
+bool load_config();
+char* get_config(char* key);
 
 #endif
