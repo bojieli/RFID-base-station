@@ -16,7 +16,7 @@ char* get_config(char* key)
             return cur->value;
         cur = cur->next;
     }
-    fprintf(stderr, "config '%s' does not exist\n", key);
+    fatal("config '%s' does not exist", key);
     return NULL;
 }
 
@@ -68,7 +68,7 @@ readkey:
     goto readkey;
 readvalue:
     if (c == '\n') {
-        debug("config %s = %s\n", key, value);
+        debug("%s = %s", key, value);
         add_config(key, value);
         memset(key, 0, MAX_STRLEN);
         memset(value, 0, MAX_STRLEN);

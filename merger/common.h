@@ -15,8 +15,16 @@
 #include <pthread.h>
 #include <ctype.h>
 
-#define IF_ERROR(expr,msg) if ((expr) == -1) { fprintf(stderr, "Error [" msg "] (errno %d)\n", errno); return 1; }
-#define debug printf
+// "format" arg is separated, in case it is not constant 
+#define debug(format, ...) { \
+    fprintf(stderr, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
+    fprintf(stderr, (format), ##__VA_ARGS__); \
+    fprintf(stderr, "\n"); \
+}
+
+#define fatal(format, ...) debug("FATAL: " format, ##__VA_ARGS__)
+
+#define IF_ERROR(expr,msg) if ((expr) == -1) { debug("assertion failed: %s (errno %d)", msg, errno); return 1; }
 
 #define bool unsigned char
 #define true 1

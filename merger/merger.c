@@ -12,7 +12,7 @@ int REQUEST_SIZE;
 static void load_global_configs() {
     PACKET_SIZE = atoi(get_config("student.packet_size"));
     if (PACKET_SIZE < 1) {
-        printf("Invalid config: student.packet_size\n");
+        fatal("Invalid config: student.packet_size");
         exit(1);
     }
     ID_SIZE = PACKET_SIZE * 2;
@@ -25,7 +25,7 @@ static void load_global_configs() {
 
 int main() {
     if (!load_config()) {
-        printf("config file does not exist\n");
+        fatal("config file does not exist");
         return 1;
     }
     load_global_configs();
@@ -42,6 +42,6 @@ int main() {
     pthread_create(&tid_sender,  NULL, (void * (*)(void *))&init_sender,  NULL);
 
     pthread_join(tid_server, NULL);
-    debug("Program terminated\n");
+    debug("Program terminated");
     return 0;
 }

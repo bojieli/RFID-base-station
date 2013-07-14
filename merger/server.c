@@ -25,7 +25,7 @@ static void handle_student(char* id, int action) {
     };
     int old_state = get(students, id);
     int new_state = state_table[old_state][action];
-    debug("student %s at %s, state %d => %d\n", id, action ? "slave" : "master", old_state, new_state);
+    debug("student %s at %s, state %d => %d", id, action ? "slave" : "master", old_state, new_state);
     set(students, id, new_state);
     clear_timeout(id);
     if (new_state != 0)
@@ -63,7 +63,7 @@ static int msg_loop(int sockfd) {
     while (1) {
         IF_ERROR(poll(fds, 3, -1), "poll")
         if (fds[0].revents & POLLERR || fds[1].revents & POLLERR || fds[2].revents & POLLERR) {
-            fprintf(stderr, "Error in polling\n");
+            fatal("Error in polling");
             return -1;
         }
 
@@ -76,10 +76,10 @@ static int msg_loop(int sockfd) {
             char* client_addr_str = inet_ntoa(client_addr.sin_addr);
             if (0 == strcmp(client_addr_str, get_config("listen.local_ip"))) {
                 fds[0].fd = newfd;
-                debug("master (%s) connected\n", client_addr_str);
+                debug("master (%s) connected", client_addr_str);
             } else {
                 fds[1].fd = newfd;
-                debug("slave (%s) connected\n", client_addr_str);
+                debug("slave (%s) connected", client_addr_str);
             }
         }
 
@@ -90,11 +90,11 @@ static int msg_loop(int sockfd) {
                 unsigned char* buf = malloc(PACKET_SIZE);
                 int readlen = recvn(fds[i].fd, buf, PACKET_SIZE);
                 if (readlen == -1) {
-                    fprintf(stderr, "Error: read from %s\n", i ? "slave" : "master");
+                    fatal("read from %s", i ? "slave" : "master");
                     return -1;
                 }
                 if (readlen < PACKET_SIZE) {
-                    debug(i ? "slave exit\n" : "master exit\n");
+                    debug(i ? "slave exit" : "master exit");
                     fds[i].fd = -1;
                     continue;
                 }
@@ -107,7 +107,7 @@ static int msg_loop(int sockfd) {
 
 int init_server()
 {
-    debug("server thread begin\n");
+    debug("server thread begin");
 
     int sockfd;
     struct sockaddr_in myaddr;
@@ -118,10 +118,10 @@ int init_server()
     bzero(&(myaddr.sin_zero), 8);
     IF_ERROR(bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr)), "bind")
     IF_ERROR(listen(sockfd, 10), "listen")
-    debug("listening %s:%s, local ip %s\n", get_config("listen.host"), get_config("listen.port"), get_config("listen.local_ip"));
+    debug("listening %s:%s, local ip %s", get_config("listen.host"), get_config("listen.port"), get_config("listen.local_ip"));
 
     int flag = msg_loop(sockfd);
 
-    debug("server thread end\n");
+    debug("server thread end");
     return flag;
 }

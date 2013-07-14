@@ -5,7 +5,7 @@ static void commit_notify_queue() {
     static int send_len = 0;
 
     if (send_buf) {
-        debug("last send command failed, resend it\n");
+        debug("last send command failed, resend it");
         goto send;
     }
 
@@ -22,7 +22,7 @@ static void commit_notify_queue() {
     pthread_mutex_unlock(&lock_notify_queue);
 
 send: {
-    debug("sending notify queue (length %d)...\n", send_len);
+    debug("sending notify queue (length %d)...", send_len);
     char* recv_buf = NULL;
     if (http_send(send_buf, send_len, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
         free(send_buf);
@@ -32,7 +32,7 @@ send: {
 }
 
 int init_sender() {
-    debug("sender thread begin\n");
+    debug("sender thread begin");
     while (1) {
         commit_notify_queue();
         sleep(atoi(get_config("cloud.request_interval"))); // sleep to prevent from exhausting the server
