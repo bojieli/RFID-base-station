@@ -15,12 +15,6 @@ static bool check_packet(unsigned char* pack) {
     return (checksum == 0);
 }
 
-static void print_packet(unsigned char* pack) {
-    int i;
-    for (i=0; i<PACKET_SIZE; i++)
-        printf("%02x ", pack[i]);
-}
-
 static void handle_student(char* id, int action) {
     const int state_table[][2] = {
         {1, 2},
@@ -29,7 +23,9 @@ static void handle_student(char* id, int action) {
         {1, 3},
         {4, 2},
     };
-    int new_state = state_table[get(students, id)][action];
+    int old_state = get(students, id);
+    int new_state = state_table[old_state][action];
+    debug("student %s at %s, state %d => %d\n", id, action ? "slave" : "master", old_state, new_state);
     set(students, id, new_state);
     clear_timeout(id);
     if (new_state != 0)
@@ -38,9 +34,14 @@ static void handle_student(char* id, int action) {
 
 static void handle_packet(unsigned char* pack, int action) {
     if (!check_packet(pack)) {
-        print_packet(pack);
+        fprintf(stderr, "Received invalid packet: ");
+        int i;
+        for (i=0; i<PACKET_SIZE; i++)
+            fprintf(stderr, "%02x ", pack[i]);
+        fprintf(stderr, "\n");
         return;
     }
+
     char* id = malloc(ID_SIZE+1);
     int i;
     for (i=0; i<PACKET_SIZE; i++) {
@@ -70,7 +71,7 @@ static int msg_loop() {
                     fprintf(stderr, "Error: read from %s\n", i ? "slave" : "master");
                     return -1;
                 }
-                if (readlen == 0) {
+                if (readlen < PACKET_SIZE) {
                     debug(i ? "slave exit\n" : "master exit\n");
                     return 0;
                 }
