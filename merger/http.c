@@ -69,7 +69,7 @@ int http_send(char* buf, size_t len, char** recvbuf) {
         get_config("cloud.remote_path"),
         get_config("cloud.remote_host"),
         get_config("cloud.user_agent"),
-        strlen(body), body);
+        (int)strlen(body), body);
     free(body);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
