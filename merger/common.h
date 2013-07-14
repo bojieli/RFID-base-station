@@ -67,4 +67,9 @@ int http_send(char* buf, size_t len, char** recvbuf);
 bool load_config();
 char* get_config(char* key);
 
+// global configs
+extern int PACKET_SIZE;
+extern int ID_SIZE;
+extern int REQUEST_SIZE;
+
 #endif

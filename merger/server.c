@@ -1,18 +1,27 @@
 #include "common.h"
 
-static int packet_size;
+static char tohexchar(int n) {
+    if (n < 10)
+        return '0' + n;
+    else
+        return 'a' + n - 10;
+}
 
-static bool check_packet(char* no) {
+static bool check_packet(unsigned char* pack) {
     unsigned char checksum = 0;
     int i;
-    for (i=0; i<packet_size; i++)
-        checksum ^= no[i];
+    for (i=0; i<PACKET_SIZE; i++)
+        checksum ^= pack[i];
     return (checksum == 0);
 }
 
-static void handle_packet(char* no, int action) {
-    if (!check_packet(no))
-        return;
+static void print_packet(unsigned char* pack) {
+    int i;
+    for (i=0; i<PACKET_SIZE; i++)
+        printf("%02x ", pack[i]);
+}
+
+static void handle_student(char* id, int action) {
     const int state_table[][2] = {
         {1, 2},
         {1, 3},
@@ -20,11 +29,27 @@ static void handle_packet(char* no, int action) {
         {1, 3},
         {4, 2},
     };
-    int new_state = state_table[get(students, no)][action];
-    set(students, no, new_state);
-    clear_timeout(no);
+    int new_state = state_table[get(students, id)][action];
+    set(students, id, new_state);
+    clear_timeout(id);
     if (new_state != 0)
-        set_timeout(no);
+        set_timeout(id);
+}
+
+static void handle_packet(unsigned char* pack, int action) {
+    if (!check_packet(pack)) {
+        print_packet(pack);
+        return;
+    }
+    char* id = malloc(ID_SIZE+1);
+    int i;
+    for (i=0; i<PACKET_SIZE; i++) {
+        id[i*2] = tohexchar(pack[i] >> 4);
+        id[i*2+1] = tohexchar(pack[i] & 0xF);
+    }
+    id[ID_SIZE] = '\0';
+    handle_student(id, action);
+    free(id);
 }
 
 static int clientfds[2] = {0};
@@ -39,8 +64,8 @@ static int msg_loop() {
         int i;
         for (i=0; i<2; i++) {
             if (fds[i].revents & POLLIN) {
-                char* buf = malloc(packet_size);
-                int readlen = recvn(clientfds[i], buf, packet_size);
+                unsigned char* buf = malloc(PACKET_SIZE);
+                int readlen = recvn(clientfds[i], buf, PACKET_SIZE);
                 if (readlen == -1) {
                     fprintf(stderr, "Error: read from %s\n", i ? "slave" : "master");
                     return -1;
@@ -50,6 +75,7 @@ static int msg_loop() {
                     return 0;
                 }
                 handle_packet(buf, i);
+                free(buf);
             }
         }
     }
@@ -85,13 +111,6 @@ int init_server()
         }
         if (clientfds[0] && clientfds[1])
             break;
-    }
-
-    // packet_size is a static global variable to improve performance
-    packet_size = atoi(get_config("student.packet_size"));
-    if (packet_size < 1) {
-        printf("Invalid config: student.packet_size");
-        return 1;
     }
 
     int flag = msg_loop();

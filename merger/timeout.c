@@ -4,8 +4,6 @@ char *notify_queue = NULL;
 int notify_queue_len = 0;
 int notify_queue_alloc_size = 0;
 
-#define REQUEST_SIZE (atoi(get_config("student.id_size")) * 2)
-
 static void notify(char* student_no, bool action) {
     pthread_mutex_lock(&lock_notify_queue);
 
@@ -14,8 +12,9 @@ static void notify(char* student_no, bool action) {
         notify_queue = realloc(notify_queue, notify_queue_alloc_size);
         debug("realloc notify_queue size to %d\n", notify_queue_alloc_size);
     }
-    memcpy(notify_queue + notify_queue_len, student_no, atoi(get_config("student.id_size")));
-    notify_queue[notify_queue_len + atoi(get_config("student.id_size"))] = action;
+    memcpy(notify_queue + notify_queue_len, student_no, ID_SIZE);
+    notify_queue[notify_queue_len + REQUEST_SIZE-2] = '0' + action;
+    notify_queue[notify_queue_len + REQUEST_SIZE-1] = '\n';
     notify_queue_len += REQUEST_SIZE;
 
     pthread_mutex_unlock(&lock_notify_queue);

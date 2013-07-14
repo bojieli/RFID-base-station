@@ -5,11 +5,30 @@ pthread_mutex_t lock_timers;
 
 dict students, timers;
 
+int PACKET_SIZE;
+int ID_SIZE;
+int REQUEST_SIZE;
+
+static void load_global_configs() {
+    PACKET_SIZE = atoi(get_config("student.packet_size"));
+    if (PACKET_SIZE < 1) {
+        printf("Invalid config: student.packet_size\n");
+        exit(1);
+    }
+    ID_SIZE = PACKET_SIZE * 2;
+/* request format: (in ASCII)
+ * | Product ID in Hex  | Action |    |
+ * | 0101xxxxxxxxxxxxxx |   0/1  | \n |
+ */
+    REQUEST_SIZE = ID_SIZE + 2;
+}
+
 int main() {
     if (!load_config()) {
-        printf("config file does not exist");
+        printf("config file does not exist\n");
         return 1;
     }
+    load_global_configs();
 
     pthread_mutex_init(&lock_notify_queue, NULL);
     pthread_mutex_init(&lock_timers, NULL);
