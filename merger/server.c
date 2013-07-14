@@ -75,12 +75,13 @@ int init_server()
         unsigned sin_size = sizeof(client_addr);
         int newfd;
         IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
-        if (client_addr.sin_addr.s_addr == htons(inet_addr(get_config("listen.local_ip")))) {
+        char* client_addr_str = inet_ntoa(client_addr.sin_addr);
+        if (0 == strcmp(client_addr_str, get_config("listen.local_ip"))) {
             clientfds[0] = newfd;
-            debug("master connected\n");
+            debug("master (%s) connected\n", client_addr_str);
         } else {
             clientfds[1] = newfd;
-            debug("slave connected\n");
+            debug("slave (%s) connected\n", client_addr_str);
         }
         if (clientfds[0] && clientfds[1])
             break;

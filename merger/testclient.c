@@ -47,7 +47,7 @@ int main()
         buf[PACK_LEN-1] = checksum;
 
         for (i=0; i<PACK_LEN; i++)
-            printf("%x ", buf[i]);
+            printf("%02x ", buf[i]);
         printf("\n");
         if (PACK_LEN != send(sockfd, buf, PACK_LEN, 0)) {
             printf("send error\n");
