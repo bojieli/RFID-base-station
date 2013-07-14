@@ -53,27 +53,50 @@ static void handle_packet(unsigned char* pack, int action) {
     free(id);
 }
 
-static int clientfds[2] = {0};
+static int msg_loop(int sockfd) {
+    struct pollfd fds[3] = {
+        {.fd = -1, .events = POLLIN}, // master 
+        {.fd = -1, .events = POLLIN}, // slave
+        {.fd = sockfd, .events = POLLIN} // accept connection
+    };
 
-static int msg_loop() {
-    struct pollfd fds[2] = {{.fd = clientfds[0], .events = POLLIN}, {.fd = clientfds[1], .events = POLLIN}};
     while (1) {
-        IF_ERROR(poll(fds, 2, -1), "poll")
-        if (fds[0].revents & POLLERR || fds[1].revents & POLLERR)
+        IF_ERROR(poll(fds, 3, -1), "poll")
+        if (fds[0].revents & POLLERR || fds[1].revents & POLLERR || fds[2].revents & POLLERR) {
+            fprintf(stderr, "Error in polling\n");
             return -1;
+        }
 
+        // accept connection
+        if (fds[2].revents & POLLIN) {
+            struct sockaddr_in client_addr;
+            unsigned sin_size = sizeof(client_addr);
+            int newfd;
+            IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
+            char* client_addr_str = inet_ntoa(client_addr.sin_addr);
+            if (0 == strcmp(client_addr_str, get_config("listen.local_ip"))) {
+                fds[0].fd = newfd;
+                debug("master (%s) connected\n", client_addr_str);
+            } else {
+                fds[1].fd = newfd;
+                debug("slave (%s) connected\n", client_addr_str);
+            }
+        }
+
+        // read from established connection
         int i;
         for (i=0; i<2; i++) {
             if (fds[i].revents & POLLIN) {
                 unsigned char* buf = malloc(PACKET_SIZE);
-                int readlen = recvn(clientfds[i], buf, PACKET_SIZE);
+                int readlen = recvn(fds[i].fd, buf, PACKET_SIZE);
                 if (readlen == -1) {
                     fprintf(stderr, "Error: read from %s\n", i ? "slave" : "master");
                     return -1;
                 }
                 if (readlen < PACKET_SIZE) {
                     debug(i ? "slave exit\n" : "master exit\n");
-                    return 0;
+                    fds[i].fd = -1;
+                    continue;
                 }
                 handle_packet(buf, i);
                 free(buf);
@@ -97,24 +120,8 @@ int init_server()
     IF_ERROR(listen(sockfd, 10), "listen")
     debug("listening %s:%s, local ip %s\n", get_config("listen.host"), get_config("listen.port"), get_config("listen.local_ip"));
 
-    while (1) {
-        struct sockaddr_in client_addr;
-        unsigned sin_size = sizeof(client_addr);
-        int newfd;
-        IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
-        char* client_addr_str = inet_ntoa(client_addr.sin_addr);
-        if (0 == strcmp(client_addr_str, get_config("listen.local_ip"))) {
-            clientfds[0] = newfd;
-            debug("master (%s) connected\n", client_addr_str);
-        } else {
-            clientfds[1] = newfd;
-            debug("slave (%s) connected\n", client_addr_str);
-        }
-        if (clientfds[0] && clientfds[1])
-            break;
-    }
+    int flag = msg_loop(sockfd);
 
-    int flag = msg_loop();
     debug("server thread end\n");
     return flag;
 }
