@@ -5,6 +5,8 @@ int notify_queue_len = 0;
 int notify_queue_alloc_size = 0;
 
 static void notify(char* student_no, bool action) {
+    debug("Notify: %s %d\n", student_no, action);
+
     pthread_mutex_lock(&lock_notify_queue);
 
     if (notify_queue_len + REQUEST_SIZE > notify_queue_alloc_size) {
@@ -52,7 +54,7 @@ static void check_timers() {
         prev_timer = timer;
     }
 
-    pthread_mutex_lock(&lock_timers);
+    pthread_mutex_unlock(&lock_timers);
 }
 
 void init_timeout(void) {
