@@ -11,7 +11,7 @@ int recvn(int fd, void* buf, size_t size) {
             return -1;
         }
         if (recvlen == 0)
-            return size;
+            return recvtotal;
         recvtotal += recvlen;
         buf += recvlen;
     }
