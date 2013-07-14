@@ -9,6 +9,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#define MERGER_HOST "192.168.0.1"
+#define MERGER_PORT 12345
+
 int sockfd;
 
 static int init_send()
@@ -20,8 +23,8 @@ static int init_send()
         return 1;
     }
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(54321);
-    inet_aton("127.0.0.1", &server_addr.sin_addr);
+    server_addr.sin_port = htons(MERGER_PORT);
+    inet_aton(MERGER_HOST, &server_addr.sin_addr);
     bzero(&(server_addr.sin_zero), 8);
     if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
         printf("error connecting master\n");
@@ -30,18 +33,26 @@ static int init_send()
     return 0;
 }
 
+#define PACK_LEN 9
 int main()
 {
-    init_send();
-    char buf[9] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    if (init_send())
+        return 1;
+    unsigned char buf[PACK_LEN] = {0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
     while (1) {
         int i;
-        for (i=0; i<9; i++) {
-            buf[i] = i;
+        unsigned char checksum = 0;
+        for (i=0; i<PACK_LEN-1; i++)
+            checksum ^= buf[i];
+        buf[PACK_LEN-1] = checksum;
+
+        for (i=0; i<PACK_LEN; i++)
             printf("%x ", buf[i]);
-        }
         printf("\n");
-        send(sockfd, buf, 9, 0);
+        if (PACK_LEN != send(sockfd, buf, PACK_LEN, 0)) {
+            printf("send error\n");
+            return 1;
+        }
         sleep(1);
     }
 }

@@ -1,6 +1,18 @@
 #include "common.h"
 
+static int packet_size;
+
+static bool check_packet(char* no) {
+    unsigned char checksum = 0;
+    int i;
+    for (i=0; i<packet_size; i++)
+        checksum ^= no[i];
+    return (checksum == 0);
+}
+
 static void handle_packet(char* no, int action) {
+    if (!check_packet(no))
+        return;
     const int state_table[][2] = {
         {1, 2},
         {1, 3},
@@ -27,8 +39,8 @@ static int msg_loop() {
         int i;
         for (i=0; i<2; i++) {
             if (fds[i].revents & POLLIN) {
-                char* buf = malloc(atoi(get_config("student.packet_size")));
-                int readlen = recvn(clientfds[i], buf, atoi(get_config("student.packet_size")));
+                char* buf = malloc(packet_size);
+                int readlen = recvn(clientfds[i], buf, packet_size);
                 if (readlen == -1) {
                     fprintf(stderr, "Error: read from %s\n", i ? "slave" : "master");
                     return -1;
@@ -45,6 +57,8 @@ static int msg_loop() {
 
 int init_server()
 {
+    debug("server thread begin\n");
+
     int sockfd;
     struct sockaddr_in myaddr;
     IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
@@ -54,12 +68,14 @@ int init_server()
     bzero(&(myaddr.sin_zero), 8);
     IF_ERROR(bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr)), "bind")
     IF_ERROR(listen(sockfd, 10), "listen")
+    debug("listening %s:%s, local ip %s\n", get_config("listen.host"), get_config("listen.port"), get_config("listen.local_ip"));
+
     while (1) {
         struct sockaddr_in client_addr;
         unsigned sin_size = sizeof(client_addr);
         int newfd;
         IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
-        if (client_addr.sin_addr.s_addr == htons(inet_addr("127.0.0.1"))) {
+        if (client_addr.sin_addr.s_addr == htons(inet_addr(get_config("listen.local_ip")))) {
             clientfds[0] = newfd;
             debug("master connected\n");
         } else {
@@ -69,5 +85,15 @@ int init_server()
         if (clientfds[0] && clientfds[1])
             break;
     }
-    return msg_loop();
+
+    // packet_size is a static global variable to improve performance
+    packet_size = atoi(get_config("student.packet_size"));
+    if (packet_size < 1) {
+        printf("Invalid config: student.packet_size");
+        return 1;
+    }
+
+    int flag = msg_loop();
+    debug("server thread end\n");
+    return flag;
 }
