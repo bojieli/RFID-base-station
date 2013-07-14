@@ -15,7 +15,7 @@
 #include <pthread.h>
 #include <ctype.h>
 
-#define IF_ERROR(expr,msg) if ((expr) == -1) { fprintf(stderr, "[%d] " msg "\n", errno); return 1; }
+#define IF_ERROR(expr,msg) if ((expr) == -1) { fprintf(stderr, "Error [" msg "] (errno %d)\n", errno); return 1; }
 #define debug printf
 
 #define bool unsigned char

@@ -9,8 +9,12 @@ static char tohexchar(int n) {
 
 static void commit_notify_queue() {
     static char *send_buf = NULL;
-    if (send_buf) // in case the last send command failed, resend it
+    static int send_len = 0;
+
+    if (send_buf) {
+        debug("last send command failed, resend it\n");
         goto send;
+    }
 
     if (notify_queue_len == 0)
         return;
@@ -23,13 +27,15 @@ static void commit_notify_queue() {
         send_buf[i*2] = tohexchar(notify_queue[i] >> 4);
         send_buf[i*2+1] = tohexchar(notify_queue[i] & 0xF);
     }
+    send_len = notify_queue_len * 2;
     notify_queue_len = 0;
 
     pthread_mutex_unlock(&lock_notify_queue);
 
 send: {
+    debug("sending notify queue (length %d)...\n", send_len);
     char* recv_buf = NULL;
-    if (http_send(send_buf, notify_queue_len*2, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
+    if (http_send(send_buf, send_len, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
         free(send_buf);
         send_buf = NULL;
     }
@@ -37,6 +43,7 @@ send: {
 }
 
 int init_sender() {
+    debug("sender thread begin\n");
     while (1) {
         commit_notify_queue();
         sleep(atoi(get_config("cloud.request_interval"))); // sleep to prevent from exhausting the server
