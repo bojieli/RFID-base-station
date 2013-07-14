@@ -45,16 +45,17 @@ static bool parse_config()
     char value[MAX_STRLEN] = {0};
 
 #define next() ({if (__next() == 0) return false; c; })
-#define next_maybe_eof() ({if (__next() == 0) return false; c; })
+#define next_maybe_eof() ({if (__next() == 0) return true; c; })
 
     next_maybe_eof();
 beginline:
     if (c == ';' || c == '[') { // comment or section name, read until \n
         while (next() != '\n');
+    }
+    if (c == '\n') { // continuous \n
+        next_maybe_eof();
         goto beginline;
     }
-    if (c == '\n') // continuous \n
-        goto beginline;
 readkey:
     if (isgraph(c)) {
         if (c == '=') {
@@ -66,13 +67,15 @@ readkey:
     next();
     goto readkey;
 readvalue:
-    if (isgraph(c) && c != '"') {
-        if (c == '\n') {
-            add_config(key, value);
-            key[0] = value[0] = 0;
-            next_maybe_eof();
-            goto beginline;
-        }
+    if (c == '\n') {
+        debug("config %s = %s\n", key, value);
+        add_config(key, value);
+        memset(key, 0, MAX_STRLEN);
+        memset(value, 0, MAX_STRLEN);
+        next_maybe_eof();
+        goto beginline;
+    }
+    else if (isgraph(c) && c != '"') {
         value[strlen(value)] = c;
     }
     next();
