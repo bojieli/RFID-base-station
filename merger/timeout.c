@@ -46,6 +46,7 @@ static void check_timers() {
             int curr_state = get(students, timer->key);
             debug("student %s timeout, back to state 0", timer->key);
             set(students, timer->key, 0); // goto state 0
+            clear_timeout(timer->key);
             if (curr_state == 3 || curr_state == 4) {
                 notify(timer->key, (curr_state == 4));
                 __remove(prev_timer);
