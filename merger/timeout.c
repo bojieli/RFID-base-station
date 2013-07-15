@@ -5,7 +5,7 @@ int notify_queue_len = 0;
 int notify_queue_alloc_size = 0;
 
 static void notify(char* student_no, bool action) {
-    debug("Notify: %s %d", student_no, action);
+    debug("Notify: student %s action %s", student_no, action ? "IN" : "OUT");
 
     pthread_mutex_lock(&lock_notify_queue);
 
@@ -44,6 +44,7 @@ static void check_timers() {
         dict timer = prev_timer->next;
         if (curr_time - timer->value >= atoi(get_config("student.timeout"))) {
             int curr_state = get(students, timer->key);
+            debug("student %s timeout, back to state 0", timer->key);
             set(students, timer->key, 0); // goto state 0
             if (curr_state == 3 || curr_state == 4) {
                 notify(timer->key, (curr_state == 4));
