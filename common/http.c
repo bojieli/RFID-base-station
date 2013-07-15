@@ -36,47 +36,42 @@ int sendn(int fd, void* buf, size_t size) {
     return sendtotal;
 }
 
-// note: buf should only include urlencoded chars
+// note: body should only include urlencoded chars
 // return received bytes on success, -1 on failure
-int http_send(const char* remote_path, char* buf, size_t len, char** recvbuf) {
+int http_post(const char* remote_host, int remote_port, const char* remote_path, char* body, size_t len, char** recvbuf) {
+
     struct sockaddr_in server_addr;
     int sockfd;
     IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(atoi(get_config("cloud.remote_port")));
-    struct hostent *he = gethostbyname(get_config("cloud.remote_host"));
+    server_addr.sin_port = htons(remote_port);
+    struct hostent *he = gethostbyname(remote_host);
     IF_ERROR((he == NULL ? -1 : 0), "gethostbyname")
     memcpy(&server_addr.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
     bzero(&(server_addr.sin_zero), 8);
     IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
-    debug("connected to server at %s:%s", inet_ntoa(server_addr.sin_addr), get_config("cloud.remote_port"));
+    debug("connected to server at %s:%d", inet_ntoa(server_addr.sin_addr), remote_port);
 
-#define MAX_HEADERS_LENGTH 300
-    char *body = malloc(len + MAX_HEADERS_LENGTH);
-    snprintf(body, len + MAX_HEADERS_LENGTH,
-        "token=%s&data=%s",
-        get_config("cloud.access_token"),
-        buf);
     char *tcp = malloc(len + MAX_HEADERS_LENGTH);
     snprintf(tcp, len + MAX_HEADERS_LENGTH,
-        "%s %s HTTP/1.1\r\n"
+        "POST %s HTTP/1.1\r\n"
         "Host: %s\r\n"
         "User-Agent: %s\r\n"
         "Connection: close\r\n"
         "Content-Length: %d\r\n"
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n%s",
-        get_config("cloud.http_method"),
         remote_path,
-        get_config("cloud.remote_host"),
-        get_config("cloud.user_agent"),
-        (int)strlen(body), body);
+        remote_host,
+        get_config("http.user_agent"),
+        (unsigned int)len, body);
     free(body);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
     free(tcp);
 
 #define BUF_SIZE 1024
+    char buf[BUF_SIZE] = {0};
     int totalbytes = 0;
     char *received = malloc(BUF_SIZE);
     bool in_payload = false, isok = false;
@@ -115,5 +110,25 @@ int http_send(const char* remote_path, char* buf, size_t len, char** recvbuf) {
     }
     debug("HTTP connection %s, %d bytes received, remote path %s", (isok ? "OK" : "failed"), totalbytes, remote_path);
     return totalbytes;
+}
+
+char* urlencode(char* msg) {
+    char* buf = malloc(strlen(msg) * 3 + 1);
+    char* cur = buf;
+    const char hexchars[17] = "0123456789abcdef";
+    while (*msg != '\0') {
+        if ((*msg>='a' && *msg<='z') || (*msg>='A' && *msg<='Z') || (*msg>='0' && *msg<='9') || *msg=='.' || *msg=='-' || *msg=='*' || *msg=='_')
+            *cur++ = *msg;
+        //else if (*msg==' ')
+        //    *cur++ = '+';
+        else {
+            *cur++ = '%';
+            *cur++ = hexchars[*msg >> 4];
+            *cur++ = hexchars[*msg & 0xF];
+        }
+        msg++;
+    }
+    *cur = '\0';
+    return buf;
 }
 

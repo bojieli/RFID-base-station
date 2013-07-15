@@ -1,9 +1,27 @@
 #include "merger.h"
 
+// return received bytes on success, -1 on failure
+int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
+    char *encoded = urlencode(buf);
+    int len = strlen(encoded);
+    char *body = malloc(len + MAX_HEADERS_LENGTH);
+    snprintf(body, len + MAX_HEADERS_LENGTH,
+        "token=%s&data=%s",
+        get_config("cloud.access_token"),
+        encoded);
+    free(encoded);
+    int flag = http_post(get_config("cloud.remote_host"),
+        atoi(get_config("cloud.remote_port")),
+        remote_path,
+        body, strlen(body), recvbuf);
+    free(body);
+    return flag;
+}
+
 static void send_heartbeat() {
     char* recv_buf = NULL;
     debug("heartbeat");
-    http_send(get_config("paths.heartbeat"), "", 0, &recv_buf);
+    cloud_send(get_config("paths.heartbeat"), "", &recv_buf);
 }
 
 static bool check_heartbeat() {
@@ -29,8 +47,10 @@ static void commit_notify_queue() {
 
     pthread_mutex_lock(&lock_notify_queue);
 
-    send_buf = malloc(notify_queue_len);
+    send_buf = malloc(notify_queue_len+1);
     memcpy(send_buf, notify_queue, notify_queue_len);
+    send_buf[notify_queue_len] = '\0';
+
     send_len = notify_queue_len;
     notify_queue_len = 0;
 
@@ -39,7 +59,7 @@ static void commit_notify_queue() {
 send: {
     debug("sending notify queue (length %d)...", send_len);
     char* recv_buf = NULL;
-    if (http_send(get_config("paths.upload"), send_buf, send_len, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
+    if (cloud_send(get_config("paths.upload"), send_buf, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
         free(send_buf);
         send_buf = NULL;
     }

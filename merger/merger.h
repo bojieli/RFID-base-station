@@ -23,6 +23,7 @@ void clear_timeout(char* key);
 void set_timeout(char* key);
 
 // sender.c
+int cloud_send(const char* remote_path, char* buf, char** recvbuf);
 int init_sender(void);
 
 // watchdog.c

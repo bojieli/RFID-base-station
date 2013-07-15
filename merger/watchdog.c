@@ -10,7 +10,7 @@ bool report_it_now(char* format, ...) {
 
     debug("REPORT IT NOW: %s", msg);
     char* recv_buf = NULL;
-    return http_send(get_config("paths.reportitnow"), msg, strlen(msg), &recv_buf);
+    return cloud_send(get_config("paths.reportitnow"), msg, &recv_buf);
 }
 
 static int get_lock_timeout() {

@@ -48,9 +48,11 @@ void __remove(dict_item* curr);
 bool del(dict d, char* key);
 
 // http.c
+#define MAX_HEADERS_LENGTH 300
 int recvn(int fd, void* buf, size_t size);
 int sendn(int fd, void* buf, size_t size);
-int http_send(const char* path, char* buf, size_t len, char** recvbuf);
+int http_post(const char* host, int port, const char* path, char* body, size_t len, char** recvbuf);
+char* urlencode(char* msg);
 
 // config.c
 bool load_config(const char* config_file);
