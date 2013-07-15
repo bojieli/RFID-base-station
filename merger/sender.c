@@ -10,7 +10,8 @@ static bool check_heartbeat() {
     static int last_time = 0;
     int now = (int)time(NULL);
     bool should_send = (now - last_time > atoi(get_config("cloud.heartbeat_interval")));
-    last_time = now;
+    if (should_send)
+        last_time = now;
     return should_send;
 }
 
