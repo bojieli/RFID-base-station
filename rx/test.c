@@ -134,9 +134,7 @@ static void on_irq(void)
     pthread_mutex_unlock(&irq_lock);
 
     if (flag) {
-        uchar sockbuf[BUF_SIZE+1] = {0xFF}; // 0xFF is header
-        memcpy(sockbuf+1, buf, BUF_SIZE);
-        if (-1 == send(sockfd, sockbuf, BUF_SIZE+1, 0)) {
+        if (-1 == send(sockfd, buf, BUF_SIZE, 0)) {
             printf("socket error\n");
         }
 
