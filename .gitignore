@@ -1,4 +1,5 @@
-rx/main
+rx/test
+rx/receiver
 tx/main
 tx/simple
 *.log

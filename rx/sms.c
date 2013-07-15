@@ -72,7 +72,7 @@ static int http_send(char* body) {
         "Content-Length: %d\r\n"
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n%s",
-        strlen(body), body);
+        (int)strlen(body), body);
     //printf("send:\n%s\n", tcp);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
