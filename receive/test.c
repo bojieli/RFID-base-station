@@ -123,7 +123,14 @@ int main(int argc, char** argv)
 {
     common_init();
 
-    int station = 0;
+    if (argc == 1) {
+        printf("WARNING: This program is for testing only!\n");
+        printf("Usage: ./test-receiver <channel> [-m] [-n]\n");
+        printf("   -m: test multiple mode\n");
+        printf("   -n: mobile message notify\n");
+    }
+
+    int station = atoi(get_config("nrf.channel"));
     if (argc >= 2)
         station = atoi(argv[1]);
     init_NRF24L01(station & 0x7F); // maximum 127 channels

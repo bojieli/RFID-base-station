@@ -30,9 +30,12 @@ static void on_irq(void)
 
 int main(int argc, char** argv)
 {
+    printf("RFID Receiver\n");
+    printf("(C) GewuIT 2013, all rights reserved.\n");
+
     common_init();
 
-    int station = 0;
+    int station = atoi(get_config("nrf.channel"));
     if (argc >= 2)
         station = atoi(argv[1]);
     init_NRF24L01(station & 0x7F); // maximum 127 channels
