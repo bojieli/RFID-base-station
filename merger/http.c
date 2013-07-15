@@ -49,7 +49,7 @@ int http_send(char* buf, size_t len, char** recvbuf) {
     memcpy(&server_addr.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
     bzero(&(server_addr.sin_zero), 8);
     IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
-    debug("connected to server at %s:%s", get_config("cloud.remote_port"), get_config("cloud.remote_host"));
+    debug("connected to server at %s:%s", inet_ntoa(server_addr.sin_addr), get_config("cloud.remote_port"));
 
 #define MAX_HEADERS_LENGTH 300
     char *body = malloc(len + MAX_HEADERS_LENGTH);
@@ -113,11 +113,7 @@ int http_send(char* buf, size_t len, char** recvbuf) {
             }
         }
     }
-    if (isok) {
-        debug("HTTP connection OK, %d bytes received", totalbytes);
-    } else {
-        debug("HTTP connection failed, server returned:\n%s", *recvbuf);
-    }
+    debug("HTTP connection %s, %d bytes received", (isok ? "OK" : "failed"), totalbytes);
     return totalbytes;
 }
 
