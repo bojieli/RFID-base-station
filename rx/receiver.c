@@ -121,9 +121,7 @@ int main(int argc, char** argv)
         station = atoi(argv[1]);
     init_NRF24L01(station & 0x7F); // maximum 127 channels
 
-    char* msg = malloc(100);
-    sprintf(msg, "Initialized channel %d", station);
-    free(msg);
+    printf("Initialized channel %d\n", station);
     
     pthread_mutex_lock(&irq_lock);
     print_configs();
