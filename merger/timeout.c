@@ -38,6 +38,7 @@ static void check_timers() {
     int curr_time = (int)time(NULL);
 
     pthread_mutex_lock(&lock_timers);
+    // WARNING: mutex is not reentrant, so please do lock it before unlock!
 
     dict prev_timer = timers;
     while (prev_timer->next != NULL) {
@@ -46,12 +47,11 @@ static void check_timers() {
             int curr_state = get(students, timer->key);
             debug("student %s timeout, back to state 0", timer->key);
             set(students, timer->key, 0); // goto state 0
-            clear_timeout(timer->key);
             if (curr_state == 3 || curr_state == 4) {
                 notify(timer->key, (curr_state == 4));
-                __remove(prev_timer);
-                continue;
             }
+            __remove(prev_timer); // when student goes to state 0, timer should be removed
+            continue;
         }
         prev_timer = timer;
     }
