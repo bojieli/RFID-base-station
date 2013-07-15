@@ -1,0 +1,27 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# Print the IP address
+#_IP=$(hostname -I) || true
+#if [ "$_IP" ]; then
+#  printf "My IP address is %s\n" "$_IP"
+#fi
+
+RFID_DIR=/home/pi/rfid-base-station
+nohup $RFID_DIR/merger/merger >>$RFID_DIR/merger/merger.log &
+echo "merger initialized"
+sleep 2   ## wait for master to init
+nohup $RFID_DIR/rx/receiver 50 >>$RFID_DIR/rx/rx.log &
+echo "receiver initialized"
+
+exit 0
