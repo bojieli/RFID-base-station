@@ -1,49 +1,15 @@
-#include <stdio.h>
-#include <string.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include "nrf.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <pthread.h>
 #include <sys/time.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include "sms.h"
 
-#define BLINK_INTERVAL 100 // in ms
-#define MULTIPLE_SEND_INTERVAL 3000 // in ms
-#define SMS_MAXNUM 4 // each RFID cannot send more than SMS_MAXNUM messages
+static void on_irq(void);
+#include "helper.c"
 
-static pthread_mutex_t irq_lock;
-struct timeval begin;
-int sockfd; // socket to master
 int batch_count = 0;
 bool test_multiple_mode = false;
 bool sms_active = false;
-char *mobile_number = NULL;
-
-static void print_buf(uchar* buf)
-{
-    int i;
-    for (i=0; i<BUF_SIZE; i++)
-        printf("%02x ", buf[i]);
-}
-
-static void blink_led()
-{
-    static int led_last_time;
-    static bool led = false;
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    int total_time = (now.tv_usec - begin.tv_usec) / 1000 + (now.tv_sec - begin.tv_sec) * 1000;
-    if (total_time - led_last_time > BLINK_INTERVAL) {
-        digitalWrite(LED_PIN, (led = ~led));
-        led_last_time = total_time;
-    }
-}
 
 static void batch(uchar* buf)
 {
@@ -91,25 +57,25 @@ static void test_multiple(uchar* buf)
     uchar no = buf[BUF_SIZE-1];
     ++total[no];
     ++counter[no];
-    if (curr_time - last_time > MULTIPLE_SEND_INTERVAL) {
+    if (curr_time - last_time > atoi(get_config("test.multiple_send_interval"))) {
         bool error_flag = false;
         for (i=0; i<256; i++) {
             if (total[i]) {
                 printf("%d:%d ", i, counter[i]);
                 if (counter[i] == 0) {
                     printf("[number %d miss]  ", i);
-                    if (sms_active && !died[i] && sms_count[i]++ < SMS_MAXNUM) {
+                    if (sms_active && !died[i] && sms_count[i]++ < atoi(get_config("sms.maxnum_per_rfid"))) {
                         char buf[100];
                         sprintf(buf, "RFID Number %d miss [5005]\n", i);
-                        sms_send(buf, mobile_number);
+                        sms_send(buf);
                     }
                     died[i] = true;
                     error_flag = true;
                 } else {
-                    if (sms_active && died[i] && sms_count[i]++ < SMS_MAXNUM) {
+                    if (sms_active && died[i] && sms_count[i]++ < atoi(get_config("sms.maxnum_per_rfid"))) {
                         char buf[100];
                         sprintf(buf, "RFID Number %d is OK [5005]\n", i);
-                        sms_send(buf, mobile_number);
+                        sms_send(buf);
                     }
                     died[i] = false;
                 }
@@ -153,60 +119,9 @@ static void on_irq(void)
 
 }
 
-
-static int init_send()
-{
-    struct sockaddr_in server_addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        printf("error creating socket\n");
-        return 1;
-    }
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(12345);
-    inet_aton("127.0.0.1", &server_addr.sin_addr);
-    bzero(&(server_addr.sin_zero), 8);
-    if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
-        printf("error connecting master\n");
-        return 1;
-    }
-    return 0;
-}
-
 int main(int argc, char** argv)
 {
-    if (getuid() != 0) {
-        printf("You must be superuser!\n");
-        return 1;
-    }
-    if (init_send())
-        return 1;
-
-    pthread_mutex_init(&irq_lock, NULL);
-
-    if (wiringPiSetup() == -1) {
-        printf("Cannot setup GPIO ports\n");
-        return 1;
-    }
-
-    pinMode(CE_PIN, OUTPUT);
-    pinMode(CSN_PIN, OUTPUT);
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, 0);
-    pinMode(LED2_PIN, OUTPUT);
-    digitalWrite(LED2_PIN, 0);
-
-    pinMode(IRQ_PIN, INPUT);
-    pullUpDnControl(IRQ_PIN, PUD_UP);
-    wiringPiISR(IRQ_PIN, INT_EDGE_FALLING, on_irq);
-
-    gettimeofday(&begin, NULL);
-    
-    // init SPI with channel 0, speed 8M
-    if (wiringPiSPISetup(0, 8000000) == -1) {
-        printf("Cannot initialize SPI\n");
-        return 1;
-    }
+    common_init();
 
     int station = 0;
     if (argc >= 2)
@@ -222,9 +137,8 @@ int main(int argc, char** argv)
     else
         batch_count = 0;
 
-    if (argc >= 5 && strcmp(argv[3], "-n") == 0) {
+    if (argc >= 4 && strcmp(argv[3], "-n") == 0) {
         sms_active = true;
-        mobile_number = argv[4];
     }
 
     char* msg = malloc(100);

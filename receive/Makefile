@@ -1,8 +1,11 @@
+COMMON_DIR=../common
+INCLUDE_DIR=${COMMON_DIR}
 BUILD_DIR=../build
+CFLAGS=-Wall -g -O2 -I${INCLUDE_DIR}
 
 all:
-	gcc -Wall -O2 -g -o ${BUILD_DIR}/test-receiver test.c nrf.c sms.c -lwiringPi -lpthread
-	gcc -Wall -O2 -g -o ${BUILD_DIR}/receiver receiver.c nrf.c -lwiringPi -lpthread
+	gcc ${CFLAGS} -o ${BUILD_DIR}/test-receiver test.c nrf.c sms.c ${COMMON_DIR}/config.c ${COMMON_DIR}/http.c -lwiringPi -lpthread
+	gcc ${CFLAGS} -o ${BUILD_DIR}/receiver receiver.c nrf.c ${COMMON_DIR}/config.c ${COMMON_DIR}/http.c -lwiringPi -lpthread
 
 clean:
 	@rm -f ${BUILD_DIR}/test-receiver ${BUILD_DIR}/receiver

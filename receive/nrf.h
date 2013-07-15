@@ -1,21 +1,20 @@
 #ifndef  __nRF24L01__
 #define  __nRF24L01__
 
-#define IRQ_PIN 1
-#define CSN_PIN 4
-#define CE_PIN 10
-#define LED_PIN 0
-#define LED2_PIN 2
+#include "common.h"
+#include <wiringPi.h>
+#include <wiringPiSPI.h>
+
+extern int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 
 typedef unsigned char uchar;
-typedef uchar bool;
 #define true 1
 #define false 0
 
 #define TX_ADR_WIDTH   5  
-#define TX_PLOAD_WIDTH 9
+extern int TX_PLOAD_WIDTH;
 #define RX_ADR_WIDTH   5
-#define RX_PLOAD_WIDTH 9
+extern int RX_PLOAD_WIDTH;
 #define BUF_SIZE RX_PLOAD_WIDTH
 
 #define CSN(state)  digitalWrite(CSN_PIN, state)
