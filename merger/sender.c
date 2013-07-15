@@ -3,7 +3,7 @@
 static void send_heartbeat() {
     char* recv_buf = NULL;
     debug("heartbeat");
-    http_send("", 0, &recv_buf);
+    http_send(get_config("paths.heartbeat"), "", 0, &recv_buf);
 }
 
 static bool check_heartbeat() {
@@ -39,7 +39,7 @@ static void commit_notify_queue() {
 send: {
     debug("sending notify queue (length %d)...", send_len);
     char* recv_buf = NULL;
-    if (http_send(send_buf, send_len, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
+    if (http_send(get_config("paths.upload"), send_buf, send_len, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
         free(send_buf);
         send_buf = NULL;
     }

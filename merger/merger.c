@@ -36,10 +36,11 @@ int main() {
     students = new_dict();
     timers = new_dict();
 
-    pthread_t tid_server, tid_timeout, tid_sender;
-    pthread_create(&tid_server,  NULL, (void * (*)(void *))&init_server,  NULL);
-    pthread_create(&tid_timeout, NULL, (void * (*)(void *))&init_timeout, NULL);
-    pthread_create(&tid_sender,  NULL, (void * (*)(void *))&init_sender,  NULL);
+    pthread_t tid_server, tid_timeout, tid_sender, tid_watchdog;
+    pthread_create(&tid_server,   NULL, (void * (*)(void *))&init_server,   NULL);
+    pthread_create(&tid_timeout,  NULL, (void * (*)(void *))&init_timeout,  NULL);
+    pthread_create(&tid_sender,   NULL, (void * (*)(void *))&init_sender,   NULL);
+    pthread_create(&tid_watchdog, NULL, (void * (*)(void *))&init_watchdog, NULL);
 
     pthread_join(tid_server, NULL);
     debug("Program terminated");

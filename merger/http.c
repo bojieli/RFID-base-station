@@ -38,7 +38,7 @@ int sendn(int fd, void* buf, size_t size) {
 
 // note: buf should only include urlencoded chars
 // return received bytes on success, -1 on failure
-int http_send(char* buf, size_t len, char** recvbuf) {
+int http_send(const char* remote_path, char* buf, size_t len, char** recvbuf) {
     struct sockaddr_in server_addr;
     int sockfd;
     IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
@@ -67,7 +67,7 @@ int http_send(char* buf, size_t len, char** recvbuf) {
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n%s",
         get_config("cloud.http_method"),
-        get_config("cloud.remote_path"),
+        remote_path,
         get_config("cloud.remote_host"),
         get_config("cloud.user_agent"),
         (int)strlen(body), body);
@@ -113,7 +113,7 @@ int http_send(char* buf, size_t len, char** recvbuf) {
             }
         }
     }
-    debug("HTTP connection %s, %d bytes received", (isok ? "OK" : "failed"), totalbytes);
+    debug("HTTP connection %s, %d bytes received, remote path %s", (isok ? "OK" : "failed"), totalbytes, remote_path);
     return totalbytes;
 }
 

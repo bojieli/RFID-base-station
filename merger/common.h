@@ -14,6 +14,7 @@
 #include <poll.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 // "format" arg is separated, in case it is not constant 
 #define debug(format, ...) { \
@@ -69,11 +70,15 @@ bool del(dict d, char* key);
 // http.c
 int recvn(int fd, void* buf, size_t size);
 int sendn(int fd, void* buf, size_t size);
-int http_send(char* buf, size_t len, char** recvbuf);
+int http_send(const char* path, char* buf, size_t len, char** recvbuf);
 
 // config.c
 bool load_config();
 char* get_config(char* key);
+
+// watchdog.c
+void init_watchdog(void);
+bool report_it_now(char* format, ...);
 
 // global configs
 extern int PACKET_SIZE;
