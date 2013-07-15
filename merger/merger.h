@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define CONFIG_FILE "merger.ini"
+#define CONFIG_FILE "../config/merger.ini"
 
 // notify queue: timeout enqueue, sender dequeue
 extern pthread_mutex_t lock_notify_queue;
