@@ -15,3 +15,6 @@ testclient: testclient.c
 test: testclient
 	ssh ${REMOTE_HOST} 'cd ${REMOTE_DIR}/merger; ./testclient' >/dev/null 2>&1 &
 	./testclient
+
+clean:
+	@rm -f merger testclient merger.log
