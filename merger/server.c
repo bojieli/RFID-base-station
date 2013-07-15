@@ -74,7 +74,8 @@ static int msg_loop(int sockfd) {
             int newfd;
             IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
             char* client_addr_str = inet_ntoa(client_addr.sin_addr);
-            if (0 == strcmp(client_addr_str, get_config("listen.local_ip"))) {
+            if (0 == strcmp(client_addr_str, get_config("listen.local_ip")) ||
+                0 == strcmp(client_addr_str, "127.0.0.1")) {
                 fds[0].fd = newfd;
                 debug("master (%s) connected", client_addr_str);
             } else {
