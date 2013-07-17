@@ -1,4 +1,4 @@
-#include "common.h"
+#include "merger.h"
 
 static void send_heartbeat() {
     char* recv_buf = NULL;

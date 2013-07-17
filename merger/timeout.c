@@ -1,4 +1,4 @@
-#include "common.h"
+#include "merger.h"
 
 char *notify_queue = NULL;
 int notify_queue_len = 0;

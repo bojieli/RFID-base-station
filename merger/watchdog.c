@@ -1,4 +1,4 @@
-#include "common.h"
+#include "merger.h"
 
 #define MSG_MAXLEN 1024
 bool report_it_now(char* format, ...) {

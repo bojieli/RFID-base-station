@@ -3,5 +3,5 @@ rx/receiver
 tx/main
 tx/simple
 *.log
-merger/merger
-merger/testclient
+build/*
+!build/*.ini

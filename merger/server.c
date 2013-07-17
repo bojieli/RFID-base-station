@@ -1,4 +1,4 @@
-#include "common.h"
+#include "merger.h"
 
 static char tohexchar(int n) {
     if (n < 10)

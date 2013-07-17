@@ -1,4 +1,4 @@
-#include "common.h"
+#include "merger.h"
 
 pthread_mutex_t lock_notify_queue;
 pthread_mutex_t lock_timers;
@@ -26,8 +26,8 @@ static void load_global_configs() {
 }
 
 int main() {
-    if (!load_config()) {
-        fatal("config file does not exist");
+    if (!load_config(CONFIG_FILE)) {
+        fatal("error parsing config file");
         return 1;
     }
     load_global_configs();

@@ -31,26 +31,6 @@
 #define true 1
 #define false 0
 
-// notify queue: timeout enqueue, sender dequeue
-extern pthread_mutex_t lock_notify_queue;
-// timers: server and timeout read and write
-extern pthread_mutex_t lock_timers;
-
-// server.c
-int init_server(void);
-
-// timeout.c
-extern char *notify_queue;
-extern int notify_queue_len;
-extern int notify_queue_alloc_size;
-
-void init_timeout(void);
-void clear_timeout(char* key);
-void set_timeout(char* key);
-
-// sender.c
-int init_sender(void);
-
 // dict.c
 typedef struct dict_item {
     char* key;
@@ -73,12 +53,8 @@ int sendn(int fd, void* buf, size_t size);
 int http_send(const char* path, char* buf, size_t len, char** recvbuf);
 
 // config.c
-bool load_config();
+bool load_config(const char* config_file);
 char* get_config(char* key);
-
-// watchdog.c
-void init_watchdog(void);
-bool report_it_now(char* format, ...);
 
 // global configs
 extern int PACKET_SIZE;

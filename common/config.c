@@ -82,8 +82,12 @@ readvalue:
     goto readvalue;
 }
 
-bool load_config()
+bool load_config(const char* config_file)
 {
-    fp = fopen("config.ini", "r");
+    fp = fopen(config_file, "r");
+    if (fp == NULL) {
+        fatal("Cannot open config file %s", config_file);
+        return false;
+    }
     return parse_config();
 }
