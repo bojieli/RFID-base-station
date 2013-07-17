@@ -14,9 +14,10 @@ static void notify(char* student_no, bool action) {
         notify_queue = realloc(notify_queue, notify_queue_alloc_size);
         debug("realloc notify_queue size to %d", notify_queue_alloc_size);
     }
+    // see merger.c for cloud request format
     memcpy(notify_queue + notify_queue_len, student_no, ID_SIZE);
     notify_queue[notify_queue_len + REQUEST_SIZE-2] = '0' + action;
-    notify_queue[notify_queue_len + REQUEST_SIZE-1] = '\n';
+    notify_queue[notify_queue_len + REQUEST_SIZE-1] = '.';
     notify_queue_len += REQUEST_SIZE;
 
     pthread_mutex_unlock(&lock_notify_queue);

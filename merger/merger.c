@@ -17,8 +17,10 @@ static void load_global_configs() {
     }
     ID_SIZE = PACKET_SIZE * 2;
 /* request format: (in ASCII)
- * | Product ID in Hex  | Action |    |
- * | 0101xxxxxxxxxxxxxx |   0/1  | \n |
+ * | Product ID in Hex  | Action | separator |
+ * | 0101xxxxxxxxxxxxxx |   0/1  |      .    |
+ * Note that these chars must be in urlencode, i.e. contain only
+ * alphanumeric chars, "-", "_" and ".".
  */
     REQUEST_SIZE = ID_SIZE + 2;
 }
