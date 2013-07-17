@@ -21,4 +21,4 @@ test: testclient
 	${BUILD_DIR}/testclient
 
 clean:
-	@rm -f ${BUILD_DIR}/*
+	@rm -f ${BUILD_DIR}/merger ${BUILD_DIR}/testclient
