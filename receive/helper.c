@@ -1,4 +1,4 @@
-#define CONFIG_FILE "../config/receiver.ini"
+FILE *logfile = NULL;
 
 int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 struct timeval begin;
@@ -9,7 +9,7 @@ static void print_buf(uchar* buf)
 {
     int i;
     for (i=0; i<BUF_SIZE; i++)
-        printf("%02x ", buf[i]);
+        fprintf(logfile, "%02x ", buf[i]);
 }
 
 static void blink_led()
@@ -30,7 +30,7 @@ static int init_send()
     struct sockaddr_in server_addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
-        printf("error creating socket\n");
+        fatal("error creating socket\n");
         return 1;
     }
     server_addr.sin_family = AF_INET;
@@ -38,7 +38,7 @@ static int init_send()
     inet_aton(get_config("master.ip"), &server_addr.sin_addr);
     bzero(&(server_addr.sin_zero), 8);
     if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
-        printf("error connecting master\n");
+        fatal("error connecting master\n");
         return 1;
     }
     return 0;
@@ -52,12 +52,26 @@ static void load_global_configs() {
     LED2_PIN = atoi(get_config("pin.LED2"));
 }
 
-void common_init()
+static void init_params(int argc, char** argv)
 {
-    if (!load_config(CONFIG_FILE)) {
+    if (argc != 3) {
+        fprintf(stderr, "Usage: receiver <config-file> <log-file>\n");
+        exit(1);
+    }
+    logfile = fopen(argv[2], "a");
+    if (logfile == NULL) {
+        fprintf(stderr, "Cannot open logfile\n");
+        exit(1);
+    }
+
+    if (!load_config(argv[1])) {
         fatal("error parsing config file");
         exit(1);
     }
+}
+
+static void common_init(void)
+{
     load_global_configs();
 
     if (getuid() != 0) {

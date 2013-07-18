@@ -18,21 +18,19 @@ static void on_irq(void)
 
     if (flag) {
         if (-1 == send(sockfd, buf, BUF_SIZE, 0)) {
-            printf("socket error\n");
+            fatal("socket error\n");
         }
         blink_led();
         print_buf(buf);
-        printf("\n");
+        fprintf(logfile, "\n");
     } else {
-        printf("Receive failed on IRQ\n");
+        debug("Receive failed on IRQ\n");
     }
 }
 
 int main(int argc, char** argv)
 {
-    printf("RFID Receiver\n");
-    printf("(C) GewuIT 2013, all rights reserved.\n");
-
+    init_params(argc, argv);
     common_init();
 
     int station = atoi(get_config("nrf.channel"));
@@ -40,7 +38,7 @@ int main(int argc, char** argv)
         station = atoi(argv[1]);
     init_NRF24L01(station & 0x7F); // maximum 127 channels
 
-    printf("Initialized channel %d\n", station);
+    debug("Initialized channel %d\n", station);
     
     pthread_mutex_lock(&irq_lock);
     print_configs();

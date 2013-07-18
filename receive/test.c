@@ -119,8 +119,14 @@ static void on_irq(void)
 
 }
 
+#define CONFIG_FILE "../config/receive.ini"
 int main(int argc, char** argv)
 {
+    logfile = stderr; 
+    if (!load_config(CONFIG_FILE)) {
+        fatal("error parsing config file");
+        exit(1);
+    }
     common_init();
 
     if (argc == 1) {

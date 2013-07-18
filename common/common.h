@@ -16,11 +16,13 @@
 #include <ctype.h>
 #include <stdarg.h>
 
+extern FILE *logfile;
+
 // "format" arg is separated, in case it is not constant 
 #define debug(format, ...) { \
-    fprintf(stderr, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
-    fprintf(stderr, (format), ##__VA_ARGS__); \
-    fprintf(stderr, "\n"); \
+    fprintf(logfile, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
+    fprintf(logfile, (format), ##__VA_ARGS__); \
+    fprintf(logfile, "\n"); \
 }
 
 #define fatal(format, ...) debug("FATAL: " format, ##__VA_ARGS__)

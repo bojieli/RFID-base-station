@@ -34,11 +34,11 @@ static void handle_student(char* id, int action) {
 
 static void handle_packet(unsigned char* pack, int action) {
     if (!check_packet(pack)) {
-        fprintf(stderr, "Received invalid packet: ");
+        fprintf(logfile, "Received invalid packet: ");
         int i;
         for (i=0; i<PACKET_SIZE; i++)
-            fprintf(stderr, "%02x ", pack[i]);
-        fprintf(stderr, "\n");
+            fprintf(logfile, "%02x ", pack[i]);
+        fprintf(logfile, "\n");
         return;
     }
 
