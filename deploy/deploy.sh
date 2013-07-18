@@ -1,4 +1,6 @@
 #!/bin/bash
+# install service to the machine
+
 if [ `whoami` != 'root' ]; then
     echo "You must be root!"
     exit 1
@@ -8,5 +10,10 @@ if [ `dirname $0` != '.' ]; then
     exit 1
 fi
 
-mv /etc/rc.local /etc/rc.local.old
-ln -s `pwd`/rc.local /etc/rc.local
+cp init.d/* /etc/init.d/
+
+INSTALL_DIR=/opt/gewuit/rfid
+mkdir -p $INSTALL_DIR/{bin,etc,log}
+cp ../build/* $INSTALL_DIR/bin/
+cp ../config/* $INSTALL_DIR/etc/
+
