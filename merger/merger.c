@@ -28,7 +28,7 @@ static void load_global_configs() {
 }
 
 int main(int argc, char** argv) {
-    if (argc <= 2) {
+    if (argc != 2 && argc != 3) {
         fprintf(stderr, "Usage: merger <config-file> [<log-file>]\n");
         exit(1);
     }

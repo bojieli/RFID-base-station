@@ -54,7 +54,7 @@ static void load_global_configs() {
 
 static void init_params(int argc, char** argv)
 {
-    if (argc <= 2) {
+    if (argc != 2 && argc != 3) {
         fprintf(stderr, "Usage: receiver <config-file> [<log-file>]\n");
         exit(1);
     }
