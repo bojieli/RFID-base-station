@@ -142,7 +142,7 @@ void print_configs()
 {
     CE(0);
     SPI_write_reg(WRITE_REG + STATUS, NRFconf("CONFIG_clear_intr")); //清中断标志位
-#define PCONF(x) printf("%15s   0x%02x\n", #x, SPI_Read(x))
+#define PCONF(x) debug("%15s   0x%02x", #x, SPI_Read(x))
     PCONF(STATUS);
     PCONF(EN_AA);
     PCONF(EN_RXADDR);
