@@ -28,11 +28,11 @@ static void load_global_configs() {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: merger <config-file> <log-file>\n");
+    if (argc <= 2) {
+        fprintf(stderr, "Usage: merger <config-file> [<log-file>]\n");
         exit(1);
     }
-    logfile = fopen(argv[2], "a");
+    logfile = argc == 3 ? fopen(argv[2], "a") : stderr;
     if (logfile == NULL) {
         fprintf(stderr, "Cannot open logfile\n");
         exit(1);
