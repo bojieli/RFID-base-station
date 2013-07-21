@@ -2,8 +2,8 @@
 
 ### BEGIN INIT INFO
 # Provides:          receiver
-# Required-Start:    $remote_fs $network $named $syslog receiver
-# Required-Stop:     $remote_fs $network $named $syslog receiver
+# Required-Start:    $remote_fs $network $named $syslog merger
+# Required-Stop:     $remote_fs $network $named $syslog merger
 # Should-Start:      $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      
@@ -31,6 +31,13 @@ test -x $DAEMON || exit 0
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 receiver_start() {
+    if ! /etc/init.d/merger status >/dev/null 2>&1; then
+        log_progress_msg "receiver depends on merger, starting it..."
+        if ! /etc/init.d/merger start >/dev/null 2>&1; then
+            log_failure_msg "merger service failed to start"
+            # continue to start receiver, in case the return value is wrong
+        fi
+    fi
     if [ ! -s "$CONFIG_FILE" ]; then
         log_failure_msg "missing or empty config file $CONFIG_FILE"
         log_end_msg 1

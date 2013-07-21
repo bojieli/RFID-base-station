@@ -22,6 +22,7 @@ cp ../build/* $INSTALL_DIR/bin/
 
 cp ../config/* $INSTALL_DIR/etc/
 
-/etc/init.d/receiver start
+# merger should be started before receiver
 /etc/init.d/merger start
+/etc/init.d/receiver start
 
