@@ -34,8 +34,6 @@ int main(int argc, char** argv)
     common_init();
 
     int station = atoi(get_config("nrf.channel"));
-    if (argc >= 2)
-        station = atoi(argv[1]);
     init_NRF24L01(station & 0x7F); // maximum 127 channels
 
     debug("Initialized channel %d\n", station);
