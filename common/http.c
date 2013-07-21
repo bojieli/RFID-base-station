@@ -65,7 +65,6 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
         remote_host,
         get_config("http.user_agent"),
         (unsigned int)len, body);
-    free(body);
 
     IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
     free(tcp);
