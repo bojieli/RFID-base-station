@@ -32,11 +32,8 @@ export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 receiver_start() {
     if ! /etc/init.d/merger status >/dev/null 2>&1; then
-        log_progress_msg "receiver depends on merger, starting it..."
-        if ! /etc/init.d/merger start >/dev/null 2>&1; then
-            log_failure_msg "merger service failed to start"
-            # continue to start receiver, in case the return value is wrong
-        fi
+        log_failure_msg "merger should be started first"
+        # continue to start receiver, in case the return value is wrong
     fi
     if [ ! -s "$CONFIG_FILE" ]; then
         log_failure_msg "missing or empty config file $CONFIG_FILE"
