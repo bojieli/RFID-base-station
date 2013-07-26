@@ -62,6 +62,14 @@ receiver_start() {
     fi
 }
 
+do_stop()
+{
+    # stop master process
+	start-stop-daemon --stop --quiet --oknodo --retry=TERM/5/KILL/5 --pidfile $PID_FILE
+    # stop child process
+    start-stop-daemon --stop --quiet --oknodo --retry=TERM/5/KILL/5 --exec $DAEMON
+}
+
 case "$1" in
   start)
 	if "$SERVICE_ENABLE"; then
@@ -80,7 +88,7 @@ case "$1" in
 	;;
   stop)
 	log_daemon_msg "Stopping receiver" "receiver"
-	start-stop-daemon --stop --quiet --oknodo --pidfile $PID_FILE
+    do_stop
 	log_end_msg $?
 	rm -f $PID_FILE
 	;;
@@ -94,7 +102,7 @@ case "$1" in
 	if $SERVICE_ENABLE; then
 	    log_daemon_msg "Restarting receiver" "receiver"
 	    if [ -s $PID_FILE ] && kill -0 $(cat $PID_FILE) >/dev/null 2>&1; then
-		start-stop-daemon --stop --quiet --oknodo --pidfile $PID_FILE || true
+        do_stop || true
 		sleep 1
 	    else
 		log_warning_msg "receiver not running, attempting to start."
