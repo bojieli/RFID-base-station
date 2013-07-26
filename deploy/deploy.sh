@@ -1,5 +1,5 @@
 #!/bin/bash
-# install service to the machine
+# install service to Debian GNU/Linux
 
 if [ `whoami` != 'root' ]; then
     echo "You must be root!"
@@ -10,7 +10,10 @@ if [ `dirname $0` != '.' ]; then
     exit 1
 fi
 
-cp init.d/* /etc/init.d/
+cp init.d/{merger,receiver} /etc/init.d/
+# merger must be started before receiver
+ln -s /etc/init.d/merger /etc/rc{2,3,4,5}.d/S19merger
+ln -s /etc/init.d/receiver /etc/rc{2,3,4,5}.d/S20receiver
 
 INSTALL_DIR=/opt/gewuit/rfid
 mkdir -p $INSTALL_DIR/{bin,etc,log}
