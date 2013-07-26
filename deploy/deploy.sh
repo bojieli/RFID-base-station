@@ -76,6 +76,7 @@ fi
 cp init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
     for i in {2..5}; do
+        rm -f /etc/rc${i}.d/S19merger /etc/rc${i}.d/S20receiver
         if [ "$TARGET" == "master" ]; then 
             # merger must be started before receiver
             ln -s /etc/init.d/merger /etc/rc${i}.d/S19merger
