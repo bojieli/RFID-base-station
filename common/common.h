@@ -21,9 +21,12 @@ extern FILE *logfile;
 // common.c
 char* print_time(void);
 
+// strip path in __FILE__
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
 // This macro is not thread-safe.
 #define generic_debug(outfd, format, ...) { \
-    fprintf(outfd, "[%s] %s:%d\t", print_time(), __FILE__, __LINE__); \
+    fprintf(outfd, "[%s] %s:%d\t", print_time(), __FILENAME__, __LINE__); \
     fprintf(outfd, (format), ##__VA_ARGS__); \
     fprintf(outfd, "\n"); \
     fflush(outfd); \
