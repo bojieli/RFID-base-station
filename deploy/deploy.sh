@@ -7,7 +7,8 @@ if [ -z "$1" ]; then
     exit 1
 elif [ "$1" == "update" ]; then
     ACTION=update
-    if [ -f "/etc/rc2.d/merger" ]; then # if merger is started at boot, it is master
+    # trick: if merger is to be started at boot, then it is master
+    if [ -f "/etc/rc2.d/S19merger" ]; then
         TARGET=master
     else
         TARGET=slave
