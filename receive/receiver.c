@@ -2,6 +2,7 @@
 #include "nrf.h"
 #include <sys/time.h>
 #include "sms.h"
+#include "sys/wait.h"
 
 static void on_irq(void);
 #include "helper.c"
@@ -28,7 +29,7 @@ static void on_irq(void)
     }
 }
 
-int main(int argc, char** argv)
+int forked_main(int argc, char** argv)
 {
     init_params(argc, argv);
     common_init();
@@ -47,4 +48,24 @@ int main(int argc, char** argv)
         sleep(1000000);
     }
     return 0;
+}
+
+int main(int argc, char** argv)
+{
+    while (1) {
+        int flag = fork();
+        if (flag == -1) {
+            fatal("fork failed");
+            return 1;
+        }
+        if (flag == 0) { // child
+            debug("child %d created", flag);
+            forked_main(argc, argv);
+            return 0;
+        } else {
+            waitpid(flag, NULL, 0);
+            debug("child %d terminated", flag);
+        }
+        sleep(1); // prevent fast respawn
+    }
 }
