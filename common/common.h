@@ -18,9 +18,12 @@
 
 extern FILE *logfile;
 
-// "format" arg is separated, in case it is not constant 
+// common.c
+char* print_time(void);
+
+// This macro is not thread-safe.
 #define generic_debug(outfd, format, ...) { \
-    fprintf(outfd, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
+    fprintf(outfd, "[%s] %s:%d\t", print_time(), __FILE__, __LINE__); \
     fprintf(outfd, (format), ##__VA_ARGS__); \
     fprintf(outfd, "\n"); \
     fflush(outfd); \
