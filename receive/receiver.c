@@ -59,10 +59,10 @@ int main(int argc, char** argv)
             return 1;
         }
         if (flag == 0) { // child
-            debug_stderr("child %d created", flag);
             forked_main(argc, argv);
             return 0;
         } else {
+            debug_stderr("child %d created", flag);
             waitpid(flag, NULL, 0);
             debug_stderr("child %d terminated", flag);
         }
