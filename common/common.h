@@ -23,6 +23,7 @@ extern FILE *logfile;
     fprintf(outfd, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
     fprintf(outfd, (format), ##__VA_ARGS__); \
     fprintf(outfd, "\n"); \
+    fflush(outfd); \
 }
 #define debug(...) generic_debug(logfile, __VA_ARGS__)
 #define debug_stderr(...) generic_debug(stderr, __VA_ARGS__)
