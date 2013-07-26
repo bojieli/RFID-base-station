@@ -3,13 +3,16 @@
 # see http://gitlab.lug.ustc.edu.cn/gewuit/rfid-base-station/wikis/home
 
 if [ -z "$1" ]; then
-    echo "Usage: ./deploy.sh [ master <access-token> | slave <ip-of-master> ]"
+    echo "Usage: ./deploy.sh [ master <access-token> | slave <ip-of-master> | update ]"
     exit 1
+elif [ "$1" == "update" ]; then
+    ACTION=update
 elif [ "$1" == "master" ]; then
     if [ -z "$2" ]; then
         echo "Please specify access token"
         exit 1
     fi
+    ACTION=install
     MASTER_IP="127.0.0.1"
     ACCESS_TOKEN=$2
 elif [ "$1" == "slave" ]; then
@@ -20,17 +23,20 @@ elif [ "$1" == "slave" ]; then
         echo "master IP is invalid"
         exit 1
     fi
+    ACTION=install
     MASTER_IP=$2
     ACCESS_TOKEN="slave-fake-token"
 else
-    echo "Please specify master or slave as first parameter"
+    echo "Please specify master, slave or update as first parameter"
     exit 1
 fi
 TARGET=$1
 
-echo "Installing for $TARGET."
-echo "master ip: $MASTER_IP"
-echo "access token: $ACCESS_TOKEN"
+echo "$ACTION for $TARGET."
+if [ "$ACTION" == "install" ]; then
+    echo "master ip: $MASTER_IP"
+    echo "access token: $ACCESS_TOKEN"
+fi
 
 if [ `whoami` != 'root' ]; then
     echo "You must be root!"
@@ -49,20 +55,27 @@ mkdir -p $INSTALL_DIR/{bin,etc,log}
 /etc/init.d/merger stop
 cp ../build/* $INSTALL_DIR/bin/
 
-cp ../config/* $INSTALL_DIR/etc/
-MERGER_CONF=$INSTALL_DIR/etc/merger.ini
-sed -i "s/^listen.local_ip = .*$/listen.local_ip = $MASTER_IP/" $MERGER_CONF
-sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $MERGER_CONF
-RECEIVER_CONF=$INSTALL_DIR/etc/receiver.ini
-sed -i "s/^master.ip = .*$/master.ip = $MASTER_IP/" $RECEIVER_CONF
-
-cp init.d/{merger,receiver} /etc/init.d/
-if [ "$TARGET" == "master" ]; then 
-    # merger must be started before receiver
-    ln -s /etc/init.d/merger /etc/rc{2,3,4,5}.d/S19merger
+# generate config files
+if [ "$ACTION" == "install" ]; then
+    cp ../config/* $INSTALL_DIR/etc/
+    MERGER_CONF=$INSTALL_DIR/etc/merger.ini
+    sed -i "s/^listen.local_ip = .*$/listen.local_ip = $MASTER_IP/" $MERGER_CONF
+    sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $MERGER_CONF
+    RECEIVER_CONF=$INSTALL_DIR/etc/receiver.ini
+    sed -i "s/^master.ip = .*$/master.ip = $MASTER_IP/" $RECEIVER_CONF
 fi
-ln -s /etc/init.d/receiver /etc/rc{2,3,4,5}.d/S20receiver
 
+# install init scripts
+cp init.d/{merger,receiver} /etc/init.d/
+if [ "$ACTION" == "install" ]; then
+    if [ "$TARGET" == "master" ]; then 
+        # merger must be started before receiver
+        ln -s /etc/init.d/merger /etc/rc{2,3,4,5}.d/S19merger
+    fi
+    ln -s /etc/init.d/receiver /etc/rc{2,3,4,5}.d/S20receiver
+fi
+
+# start services
 if [ "$TARGET" == "master" ]; then
     /etc/init.d/merger start
 fi
