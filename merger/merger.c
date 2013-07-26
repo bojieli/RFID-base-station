@@ -32,9 +32,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Usage: merger <config-file> [<log-file>]\n");
         exit(1);
     }
-    logfile = argc == 3 ? fopen(argv[2], "a") : stderr;
+    logfile = (argc == 3 ? fopen(argv[2], "a") : stderr);
     if (logfile == NULL) {
-        fprintf(stderr, "Cannot open logfile\n");
+        fatal_stderr("Cannot open logfile");
         exit(1);
     }
 
