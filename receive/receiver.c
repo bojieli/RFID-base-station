@@ -17,7 +17,7 @@ static void on_irq(void)
     pthread_mutex_unlock(&irq_lock);
 
     if (flag) {
-        if (-1 == send(sockfd, buf, BUF_SIZE, 0)) {
+        if (sendn(sockfd, buf, BUF_SIZE) < BUF_SIZE) {
             fatal("socket error\n");
         }
         blink_led();
