@@ -117,6 +117,8 @@ int init_server()
     myaddr.sin_port = htons(atoi(get_config("listen.port")));
     myaddr.sin_addr.s_addr = inet_addr(get_config("listen.host"));
     bzero(&(myaddr.sin_zero), 8);
+    int yes = 1;
+    IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)), "setsockopt")
     IF_ERROR(bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr)), "bind")
     IF_ERROR(listen(sockfd, 10), "listen")
     debug("listening %s:%s, local ip %s", get_config("listen.host"), get_config("listen.port"), get_config("listen.local_ip"));
