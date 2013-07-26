@@ -7,12 +7,18 @@ if [ -z "$1" ]; then
     exit 1
 elif [ "$1" == "update" ]; then
     ACTION=update
+    if [ -f "/etc/rc2.d/merger" ]; then # if merger is started at boot, it is master
+        TARGET=master
+    else
+        TARGET=slave
+    fi
 elif [ "$1" == "master" ]; then
     if [ -z "$2" ]; then
         echo "Please specify access token"
         exit 1
     fi
     ACTION=install
+    TARGET=$1
     MASTER_IP="127.0.0.1"
     ACCESS_TOKEN=$2
 elif [ "$1" == "slave" ]; then
@@ -24,13 +30,13 @@ elif [ "$1" == "slave" ]; then
         exit 1
     fi
     ACTION=install
+    TARGET=$1
     MASTER_IP=$2
     ACCESS_TOKEN="slave-fake-token"
 else
     echo "Please specify master, slave or update as first parameter"
     exit 1
 fi
-TARGET=$1
 
 echo "$ACTION for $TARGET."
 if [ "$ACTION" == "install" ]; then
@@ -68,11 +74,13 @@ fi
 # install init scripts
 cp init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
-    if [ "$TARGET" == "master" ]; then 
-        # merger must be started before receiver
-        ln -s /etc/init.d/merger /etc/rc{2,3,4,5}.d/S19merger
-    fi
-    ln -s /etc/init.d/receiver /etc/rc{2,3,4,5}.d/S20receiver
+    for i in {2..5}; do
+        if [ "$TARGET" == "master" ]; then 
+            # merger must be started before receiver
+            ln -s /etc/init.d/merger /etc/rc${i}.d/S19merger
+        fi
+        ln -s /etc/init.d/receiver /etc/rc${i}.d/S20receiver
+    done
 fi
 
 # start services
