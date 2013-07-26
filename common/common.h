@@ -19,13 +19,16 @@
 extern FILE *logfile;
 
 // "format" arg is separated, in case it is not constant 
-#define debug(format, ...) { \
-    fprintf(logfile, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
-    fprintf(logfile, (format), ##__VA_ARGS__); \
-    fprintf(logfile, "\n"); \
+#define generic_debug(outfd, format, ...) { \
+    fprintf(outfd, "[%d] %s:%d\t", (int)time(NULL), __FILE__, __LINE__); \
+    fprintf(outfd, (format), ##__VA_ARGS__); \
+    fprintf(outfd, "\n"); \
 }
+#define debug(...) generic_debug(logfile, __VA_ARGS__)
+#define debug_stderr(...) generic_debug(stderr, __VA_ARGS__)
 
 #define fatal(format, ...) debug("FATAL: " format, ##__VA_ARGS__)
+#define fatal_stderr(format, ...) debug_stderr("FATAL: " format, ##__VA_ARGS__)
 
 #define IF_ERROR(expr,msg) if ((expr) == -1) { debug("assertion failed: %s (errno %d)", msg, errno); return 1; }
 

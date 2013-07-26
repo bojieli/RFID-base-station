@@ -55,16 +55,16 @@ int main(int argc, char** argv)
     while (1) {
         int flag = fork();
         if (flag == -1) {
-            fatal("fork failed");
+            fatal_stderr("fork failed");
             return 1;
         }
         if (flag == 0) { // child
-            debug("child %d created", flag);
+            debug_stderr("child %d created", flag);
             forked_main(argc, argv);
             return 0;
         } else {
             waitpid(flag, NULL, 0);
-            debug("child %d terminated", flag);
+            debug_stderr("child %d terminated", flag);
         }
         sleep(1); // prevent fast respawn
     }
