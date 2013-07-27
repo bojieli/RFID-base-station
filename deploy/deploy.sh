@@ -2,37 +2,44 @@
 # install service to Debian GNU/Linux
 # see http://gitlab.lug.ustc.edu.cn/gewuit/rfid-base-station/wikis/home
 
+isip()
+{
+    return [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
+}
+
 if [ -z "$1" ]; then
-    echo "Usage: ./deploy.sh [ master <access-token> | slave <ip-of-master> | update ]"
+    echo "Usage: ./deploy.sh [ master <ip-of-slave> <access-token> | slave <ip-of-master> | update ]"
     exit 1
 elif [ "$1" == "update" ]; then
     ACTION=update
-    # trick: if merger is to be started at boot, then it is master
-    if [ -f "/etc/rc2.d/S19merger" ]; then
+    if [ `hostname` == "master" ]; then
         TARGET=master
     else
         TARGET=slave
     fi
 elif [ "$1" == "master" ]; then
-    if [ -z "$2" ]; then
+    if ! isip "$2"; then
+        echo "slave IP is invalid"
+        exit 1
+    fi
+    if [ -z "$3" ]; then
         echo "Please specify access token"
         exit 1
     fi
     ACTION=install
     TARGET=$1
     MASTER_IP="127.0.0.1"
-    ACCESS_TOKEN=$2
+    SLAVE_IP=$2
+    ACCESS_TOKEN=$3
 elif [ "$1" == "slave" ]; then
-    if [ -z "$2" ]; then
-        echo "Please specify ip address of master"
-        exit 1
-    elif [[ ! "$2" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+    if ! isip "$2"; then
         echo "master IP is invalid"
         exit 1
     fi
     ACTION=install
     TARGET=$1
     MASTER_IP=$2
+    SLAVE_IP="127.0.0.1"
     ACCESS_TOKEN="slave-fake-token"
 else
     echo "Please specify master, slave or update as first parameter"
@@ -70,7 +77,7 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install init scripts
-cp $CODE_BASE/init.d/{merger,receiver} /etc/init.d/
+cp $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
     for i in {2..5}; do
         rm -f /etc/rc${i}.d/S19merger /etc/rc${i}.d/S20receiver
@@ -81,6 +88,18 @@ if [ "$ACTION" == "install" ]; then
         ln -s /etc/init.d/receiver /etc/rc${i}.d/S20receiver
     done
 fi
+
+# install helper scripts
+cp $CODE_BASE/deploy/helper/* /usr/local/bin/
+
+# set hostname
+echo $TARGET > /etc/hostname
+hostname $TARGET
+sed -i '/^127\.0\.0\.1.*/d' /etc/hosts
+sed -i '/\(master\|slave\)$/d' /etc/hosts
+echo "127.0.0.1 localhost" >> /etc/hosts
+echo "$MASTER_IP master" >> /etc/hosts
+echo "$SLAVE_IP slave" >> /etc/hosts
 
 # start services
 if [ "$TARGET" == "master" ]; then
