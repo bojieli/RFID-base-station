@@ -107,6 +107,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
             }
         }
     }
+    close(sockfd);
     debug("HTTP connection %s, %d bytes received, remote path %s", (isok ? "OK" : "failed"), totalbytes, remote_path);
     return totalbytes;
 }
