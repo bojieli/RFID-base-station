@@ -49,22 +49,19 @@ if [ `whoami` != 'root' ]; then
     echo "You must be root!"
     exit 1
 fi
-if [ `dirname $0` != '.' ]; then
-    echo "You must run the script in its directory!"
-    exit 1
-fi
 
+CODE_BASE=`dirname $0`/..
 INSTALL_DIR=/opt/gewuit/rfid
 mkdir -p $INSTALL_DIR/{bin,etc,log}
 
 # must stop services before replacing binaries
 /etc/init.d/receiver stop
 /etc/init.d/merger stop
-cp ../build/* $INSTALL_DIR/bin/
+cp $CODE_BASE/build/* $INSTALL_DIR/bin/
 
 # generate config files
 if [ "$ACTION" == "install" ]; then
-    cp ../config/* $INSTALL_DIR/etc/
+    cp $CODE_BASE/config/* $INSTALL_DIR/etc/
     MERGER_CONF=$INSTALL_DIR/etc/merger.ini
     sed -i "s/^listen.local_ip = .*$/listen.local_ip = $MASTER_IP/" $MERGER_CONF
     sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $MERGER_CONF
@@ -73,7 +70,7 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install init scripts
-cp init.d/{merger,receiver} /etc/init.d/
+cp $CODE_BASE/init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
     for i in {2..5}; do
         rm -f /etc/rc${i}.d/S19merger /etc/rc${i}.d/S20receiver
