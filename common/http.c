@@ -45,6 +45,10 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
     // dynamically allocated
     char *tcp = NULL;
     char *received = NULL;
+    // the return value
+    int totalbytes = 0;
+    // HTTP request succeed?
+    bool isok = false;
 
     struct sockaddr_in server_addr;
     int sockfd;
@@ -76,9 +80,8 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 
 #define BUF_SIZE 1024
     char buf[BUF_SIZE] = {0};
-    int totalbytes = 0;
     received = malloc(BUF_SIZE);
-    bool in_payload = false, isok = false;
+    bool in_payload = false;
     while (1) {
         int recvbytes = recv(sockfd, received, BUF_SIZE, 0);
         if (recvbytes == -1) {
