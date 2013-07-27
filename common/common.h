@@ -37,7 +37,13 @@ char* print_time(void);
 #define fatal(format, ...) debug("FATAL: " format, ##__VA_ARGS__)
 #define fatal_stderr(format, ...) debug_stderr("FATAL: " format, ##__VA_ARGS__)
 
-#define IF_ERROR(expr,msg) if ((expr) == -1) { debug("assertion failed: %s (errno %d)", msg, errno); return 1; }
+// fail fast to find bugs earlier
+#define __ASSERT(expr,msg) if (!(expr)) { \
+    fatal("assertion failed: %s (errno %d)", msg, errno); \
+    exit(1); \
+}
+#define IF_ERROR(expr,msg) __ASSERT((expr != -1), msg)
+#define ASSERT(expr) __ASSERT(expr, #expr)
 
 #define bool unsigned char
 #define true 1
