@@ -1,0 +1,14 @@
+#!/bin/bash
+# restart services in testing mode
+# to enable deployment team to install and test
+
+if [ `hostname` != "master" ]; then
+    echo "This script should be run on master!"
+fi
+
+echo "restarting services on master..."
+sudo /etc/init.d/merger restart
+sudo /etc/init.d/receiver restart
+
+echo "restarting services on slave"
+ssh slave "sudo /etc/init.d/receiver restart"

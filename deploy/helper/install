@@ -1,0 +1,19 @@
+#!/bin/bash
+# interactive deploy script
+
+echo "===== Install RFID base station ====="
+echo -n "Is it [master] or [slave]? "
+read target
+if [ "$target" == "master" ]; then
+    echo -n "IP address of slave: "
+    read ip
+    echo -n "School token: "
+    read token
+    sudo ./deploy.sh master $ip $token
+elif [ "$target" == "slave" ]; then
+    echo -n "IP address of master: "
+    read ip
+    sudo ./deploy.sh slave $ip
+else
+    echo 'Please input "master" or "slave"'
+fi
