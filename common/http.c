@@ -40,19 +40,25 @@ int sendn(int fd, void* buf, size_t size) {
 // return received bytes on success, -1 on failure
 int http_post(const char* remote_host, int remote_port, const char* remote_path, char* body, size_t len, char** recvbuf) {
 
+#define MY_IF_ERROR(exp, msg) if (-1 == (exp)) { debug(msg); goto out; }
+
+    // dynamically allocated
+    char *tcp = NULL;
+    char *received = NULL;
+
     struct sockaddr_in server_addr;
     int sockfd;
-    IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
+    MY_IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(remote_port);
     struct hostent *he = gethostbyname(remote_host);
-    IF_ERROR((he == NULL ? -1 : 0), "gethostbyname")
+    MY_IF_ERROR((he == NULL ? -1 : 0), "gethostbyname")
     memcpy(&server_addr.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
     bzero(&(server_addr.sin_zero), 8);
-    IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
+    MY_IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
     debug("connected to server at %s:%d", inet_ntoa(server_addr.sin_addr), remote_port);
 
-    char *tcp = malloc(len + MAX_HEADERS_LENGTH);
+    tcp = malloc(len + MAX_HEADERS_LENGTH);
     snprintf(tcp, len + MAX_HEADERS_LENGTH,
         "POST %s HTTP/1.1\r\n"
         "Host: %s\r\n"
@@ -66,13 +72,12 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
         get_config("http.user_agent"),
         (unsigned int)len, body);
 
-    IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
-    free(tcp);
+    MY_IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
 
 #define BUF_SIZE 1024
     char buf[BUF_SIZE] = {0};
     int totalbytes = 0;
-    char *received = malloc(BUF_SIZE);
+    received = malloc(BUF_SIZE);
     bool in_payload = false, isok = false;
     while (1) {
         int recvbytes = recv(sockfd, received, BUF_SIZE, 0);
@@ -107,6 +112,11 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
             }
         }
     }
+out:
+    if (tcp != NULL)
+        free(tcp);
+    if (received != NULL)
+        free(received);
     close(sockfd);
     debug("HTTP connection %s, %d bytes received, remote path %s", (isok ? "OK" : "failed"), totalbytes, remote_path);
     return totalbytes;
