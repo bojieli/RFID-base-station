@@ -1,12 +1,19 @@
 #include "common.h"
 
+/* Notes on Linux recv and send in blocking mode:
+ * They may return -1 with errno EINTR in case of interrupts,
+ *   so these cases must be handled as if no error occured.
+ * They may return partial count or zero with errno EAGAIN
+ *   or EWOULDBLOCK in case of timeout, so the request fails.
+ */
+
 // receive until error or filled up the buffer
 int recvn(int fd, void* buf, size_t size) {
     int recvtotal = 0;
     while (recvtotal < size) {
         int recvlen = recv(fd, buf, size - recvtotal, 0);
         if (recvlen == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+            if (errno == EINTR)
                 continue;
             return -1;
         }
@@ -24,7 +31,7 @@ int sendn(int fd, void* buf, size_t size) {
     while (sendtotal < size) {
         int sendlen = send(fd, buf, size - sendtotal, 0);
         if (sendlen == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+            if (errno == EINTR)
                 continue;
             return -1;
         }
@@ -50,9 +57,14 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
     // HTTP request succeed?
     bool isok = false;
 
+    unsigned int start_time = (unsigned int)time(NULL);
+
     struct sockaddr_in server_addr;
     int sockfd;
     MY_IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
+    struct timeval timeout = {.tv_sec = atoi(get_config("http.timeout")), .tv_usec = 0};
+    MY_IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)), "set recv timeout")
+    MY_IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)), "set send timeout")
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(remote_port);
     struct hostent *he = gethostbyname(remote_host);
@@ -76,16 +88,26 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
         get_config("http.user_agent"),
         (unsigned int)len, body);
 
-    MY_IF_ERROR(sendn(sockfd, tcp, strlen(tcp)), "send to remote server")
+    int sendlen = strlen(tcp);
+    int sendedlen = send(sockfd, tcp, sendlen, 0);
+    if (sendedlen < strlen(tcp)) {
+        fatal("send to remote server: %d bytes sent, total %d bytes", sendedlen, sendlen);
+        goto out;
+    }
 
 #define BUF_SIZE 1024
     char buf[BUF_SIZE] = {0};
     received = malloc(BUF_SIZE);
     bool in_payload = false;
     while (1) {
+        unsigned int curr_time = (unsigned int)time(NULL);
+        if (curr_time - start_time > timeout.tv_sec) {
+            fatal("HTTP request timeout, start %u, now %u", start_time, curr_time);
+            goto out;
+        }
         int recvbytes = recv(sockfd, received, BUF_SIZE, 0);
         if (recvbytes == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+            if (errno == EINTR)
                 continue;
             break;
         }
