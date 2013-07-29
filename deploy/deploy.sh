@@ -69,11 +69,11 @@ mkdir -p $INSTALL_DIR/{bin,etc,log}
 # must stop services before replacing binaries
 /etc/init.d/receiver stop
 /etc/init.d/merger stop
-cp $CODE_BASE/build/* $INSTALL_DIR/bin/
+cp -a $CODE_BASE/build/* $INSTALL_DIR/bin/
 
 # generate config files
 if [ "$ACTION" == "install" ]; then
-    cp $CODE_BASE/config/* $INSTALL_DIR/etc/
+    cp -a $CODE_BASE/config/* $INSTALL_DIR/etc/
     MERGER_CONF=$INSTALL_DIR/etc/merger.ini
     sed -i "s/^listen.local_ip = .*$/listen.local_ip = $MASTER_IP/" $MERGER_CONF
     sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $MERGER_CONF
@@ -82,7 +82,7 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install init scripts
-cp $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
+cp -a $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
     for i in {2..5}; do
         rm -f /etc/rc${i}.d/S19merger /etc/rc${i}.d/S20receiver
@@ -95,7 +95,7 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install helper scripts
-cp $CODE_BASE/deploy/helper/* /usr/local/bin/
+cp -a $CODE_BASE/deploy/helper/* /usr/local/bin/
 
 # set hostname
 echo $TARGET > /etc/hostname
