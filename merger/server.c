@@ -77,10 +77,10 @@ static int msg_loop(int sockfd) {
             if (0 == strcmp(client_addr_str, get_config("listen.local_ip")) ||
                 0 == strcmp(client_addr_str, "127.0.0.1")) {
                 fds[0].fd = newfd;
-                debug("master (%s) connected", client_addr_str);
+                report_it_now("master (%s) connected", client_addr_str);
             } else {
                 fds[1].fd = newfd;
-                debug("slave (%s) connected", client_addr_str);
+                report_it_now("slave (%s) connected", client_addr_str);
             }
         }
 
@@ -95,7 +95,7 @@ static int msg_loop(int sockfd) {
                     return -1;
                 }
                 if (readlen < PACKET_SIZE) {
-                    debug(i ? "slave exit" : "master exit");
+                    report_it_now(i ? "slave exit" : "master exit");
                     fds[i].fd = -1;
                     continue;
                 }
