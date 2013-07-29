@@ -98,13 +98,15 @@ fi
 cp -a $CODE_BASE/deploy/helper/* /usr/local/bin/
 
 # set hostname
-echo $TARGET > /etc/hostname
-hostname $TARGET
-sed -i '/^127\.0\.0\.1.*/d' /etc/hosts
-sed -i '/\(master\|slave\)$/d' /etc/hosts
-echo "127.0.0.1 localhost" >> /etc/hosts
-echo "$MASTER_IP master" >> /etc/hosts
-echo "$SLAVE_IP slave" >> /etc/hosts
+if [ "$ACTION" == "install" ]; then
+    echo $TARGET > /etc/hostname
+    hostname $TARGET
+    sed -i '/^127\.0\.0\.1.*/d' /etc/hosts
+    sed -i '/\(master\|slave\)$/d' /etc/hosts
+    echo "127.0.0.1 localhost" >> /etc/hosts
+    echo "$MASTER_IP master" >> /etc/hosts
+    echo "$SLAVE_IP slave" >> /etc/hosts
+fi
 
 # start services
 if [ "$TARGET" == "master" ]; then
