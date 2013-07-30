@@ -80,6 +80,7 @@ static int msg_loop(int sockfd) {
         // read from established connection
         int i;
         for (i=0; i<2; i++) {
+            receiver_alive[i] = true;
             if (fds[i].revents & POLLIN) {
                 unsigned char* buf = malloc(PACKET_SIZE);
                 int readlen = recvn(fds[i].fd, buf, PACKET_SIZE);

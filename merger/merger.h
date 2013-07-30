@@ -27,5 +27,6 @@ int init_sender(void);
 // watchdog.c
 void init_watchdog(void);
 bool report_it_now(char* format, ...);
+extern bool receiver_alive[];
 
 #endif
