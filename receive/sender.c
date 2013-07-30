@@ -1,6 +1,11 @@
 #include "common.h"
 #include "receive.h"
 
+pthread_mutex_t lock_sender;
+
+static unsigned char* send_queue;
+static unsigned int send_queue_len;
+static unsigned int send_queue_size;
 static int sockfd = -1;
 
 void add_to_queue(unsigned char* buf, size_t len) {
