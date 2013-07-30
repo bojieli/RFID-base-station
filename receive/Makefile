@@ -3,8 +3,12 @@ INCLUDE_DIR=${COMMON_DIR}
 BUILD_DIR=../build
 CFLAGS=-Wall -g -O2 -I${INCLUDE_DIR}
 
-all:
+all: test-receiver receiver
+
+test-receiver:
 	gcc ${CFLAGS} -o ${BUILD_DIR}/test-receiver test.c nrf.c sms.c ${COMMON_DIR}/common.c ${COMMON_DIR}/config.c ${COMMON_DIR}/http.c -lwiringPi
+
+receiver:
 	gcc ${CFLAGS} -o ${BUILD_DIR}/receiver receiver.c sender.c nrf.c ${COMMON_DIR}/common.c ${COMMON_DIR}/config.c ${COMMON_DIR}/http.c -lwiringPi
 
 clean:
