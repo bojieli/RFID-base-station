@@ -2,11 +2,11 @@
 
 ### BEGIN INIT INFO
 # Provides:          receiver
-# Required-Start:    $remote_fs $network $named $syslog
-# Required-Stop:     $remote_fs $network $named $syslog
+# Required-Start:    $remote_fs $network $named $syslog merger
+# Required-Stop:     $remote_fs $network $named $syslog merger
 # Should-Start:      $named
 # Default-Start:     2 3 4 5
-# Default-Stop:      
+# Default-Stop:      0 1 6
 # Short-Description: RFID receiver
 # Description:       receive Card IDs from NRF24L01 chip
 #                    and report them to receiver
