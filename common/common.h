@@ -75,7 +75,7 @@ char* urlencode(char* msg);
 
 // config.c
 bool load_config(const char* config_file);
-char* get_config(char* key);
+char* get_config(const char* key);
 
 // global configs
 extern int PACKET_SIZE;

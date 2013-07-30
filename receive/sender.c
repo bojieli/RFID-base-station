@@ -53,15 +53,19 @@ static bool do_send(void) {
         pthread_mutex_unlock(&lock_sender);
     }
 
-    int sendedlen = send(sockfd, tcp, sendlen, 0);
-    if (sendedlen < strlen(tcp)) { // send not success
+    int sendedlen = send(sockfd, sendbuf, sendlen, 0);
+    if (sendedlen < sendlen) { // send not success
         fatal("error sending, queue length %d", sendlen);
         lastok = false;
         close(sockfd);
         sockfd = -1;
         return false;
     }
-    return true;
+    else { // send ok
+        lastok = true;
+        free(sendbuf);
+        return true;
+    }
 }
 
 static void delay_conf(const char* conf) {

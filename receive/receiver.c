@@ -33,9 +33,9 @@ int forked_main(int argc, char** argv)
     init_params(argc, argv);
     common_init();
 
-    pthread_mutex_init(&lock_sender);
+    pthread_mutex_init(&lock_sender, NULL);
     pthread_t tid_sender;
-    pthread_create(&tid_sender, NULL, (void * (*)(void *))&cron_send);
+    pthread_create(&tid_sender, NULL, (void * (*)(void *))&cron_send, NULL);
 
     int station = atoi(get_config("nrf.channel"));
     init_NRF24L01(station & 0x7F); // maximum 127 channels

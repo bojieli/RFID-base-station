@@ -8,7 +8,7 @@ struct config {
 static struct config* conf = NULL;
 static FILE* fp;
 
-char* get_config(char* key)
+char* get_config(const char* key)
 {
     struct config* cur = conf;
     while (cur != NULL) {
