@@ -3,13 +3,19 @@ FILE *logfile = NULL;
 int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 struct timeval begin;
 static pthread_mutex_t irq_lock;
-int sockfd; // socket to master
 
 static void print_buf(uchar* buf)
 {
+    char str[BUF_SIZE * 3];
     int i;
-    for (i=0; i<BUF_SIZE; i++)
-        fprintf(logfile, "%02x ", buf[i]);
+    for (i=0; i<BUF_SIZE; i++) {
+        str[i*3 + 0] = tohexchar(buf[i] >> 4);
+        str[i*3 + 1] = tohexchar(buf[i] & 15);
+        str[i*3 + 2] = ' ';
+    }
+    str[BUF_SIZE*3 - 1] = '\0';
+
+    debug("received ID: %s", str);
 }
 
 static void blink_led()
@@ -23,25 +29,6 @@ static void blink_led()
         digitalWrite(LED_PIN, (led = ~led));
         led_last_time = total_time;
     }
-}
-
-static int init_send()
-{
-    struct sockaddr_in server_addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        fatal("error creating socket\n");
-        return 1;
-    }
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(atoi(get_config("master.port")));
-    inet_aton(get_config("master.ip"), &server_addr.sin_addr);
-    bzero(&(server_addr.sin_zero), 8);
-    if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
-        fatal("error connecting master\n");
-        return 1;
-    }
-    return 0;
 }
 
 static void load_global_configs() {
@@ -76,9 +63,6 @@ static void common_init(void)
 
     if (getuid() != 0) {
         fatal("You must be superuser!");
-        exit(1);
-    }
-    if (init_send()) {
         exit(1);
     }
 
