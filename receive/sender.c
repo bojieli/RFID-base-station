@@ -27,7 +27,8 @@ static bool try_connect(void)
     struct sockaddr_in server_addr;
     IF_ERROR(sockfd = socket(AF_INET, SOCK_STREAM, 0), "create socket")
 
-    struct timeval timeout = {.tv_sec = 0, .tv_usec = atoi(get_config("master.send_timeout")) * 1000};
+    unsigned int timeout_ms = atoi(get_config("master.send_timeout"));
+    struct timeval timeout = {.tv_sec = timeout_ms / 1000, .tv_usec = (timeout_ms % 1000) * 1000};
     IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)), "set recv timeout")
     IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)), "set send timeout")
 
