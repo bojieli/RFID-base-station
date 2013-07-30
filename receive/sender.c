@@ -52,11 +52,17 @@ static bool do_send(void) {
 
     if (lastok) {
         pthread_mutex_lock(&lock_sender);
-        sendbuf = malloc(send_queue_len);
-        memcpy(sendbuf, send_queue, send_queue_len);
-        sendlen = send_queue_len;
-        send_queue_len = 0;
-        pthread_mutex_unlock(&lock_sender);
+        if (send_queue_len == 0) { // send heartbeat with all bytes zero
+            sendbuf = malloc(BUF_SIZE);
+            bzero(sendbuf, BUF_SIZE);
+            sendlen = BUF_SIZE;
+        } else { // send normal data
+            sendbuf = malloc(send_queue_len);
+            memcpy(sendbuf, send_queue, send_queue_len);
+            sendlen = send_queue_len;
+            send_queue_len = 0;
+            pthread_mutex_unlock(&lock_sender);
+        }
     }
 
     int sendedlen = send(sockfd, sendbuf, sendlen, 0);
