@@ -84,10 +84,12 @@ fi
 # install init scripts
 cp -a $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
-    update-rc.d receiver defaults
     if [ "$TARGET" == "master" ]; then 
         update-rc.d merger defaults
+    else ## merger is not enabled on slave, so remove the dependency
+        sed -i 's/\(Required-\(Start\|Stop\)\:.*\)merger/\1/' /etc/init.d/receiver
     fi
+    update-rc.d receiver defaults
 fi
 
 # install helper scripts
