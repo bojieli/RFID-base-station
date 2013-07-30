@@ -6,7 +6,7 @@
 # Required-Stop:     $remote_fs $network $named $syslog
 # Should-Start:      $named
 # Default-Start:     2 3 4 5
-# Default-Stop:      
+# Default-Stop:      0 1 6
 # Short-Description: RFID master-slave merger
 # Description:       merge RFID IDs received by master and slave,
 #                    generate events of students going in/out school gate,
