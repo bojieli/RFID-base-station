@@ -100,10 +100,6 @@ static void on_irq(void)
     pthread_mutex_unlock(&irq_lock);
 
     if (flag) {
-        if (-1 == send(sockfd, buf, BUF_SIZE, 0)) {
-            printf("socket error\n");
-        }
-
         blink_led();
         if (test_multiple_mode)
             test_multiple(buf);
