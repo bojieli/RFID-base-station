@@ -1,12 +1,5 @@
 #include "merger.h"
 
-static char tohexchar(int n) {
-    if (n < 10)
-        return '0' + n;
-    else
-        return 'a' + n - 10;
-}
-
 static bool check_packet(unsigned char* pack) {
     unsigned char checksum = 0;
     int i;

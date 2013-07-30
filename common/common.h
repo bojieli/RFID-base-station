@@ -20,6 +20,7 @@ extern FILE *logfile;
 
 // common.c
 char* print_time(void);
+char tohexchar(int n);
 
 // strip path in __FILE__
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)

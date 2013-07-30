@@ -14,3 +14,10 @@ char* print_time() {
     strftime(time_strbuf, TIME_BUFSIZE, "%Y-%m-%d %H:%M:%S", tm_info);
     return time_strbuf;
 }
+
+char tohexchar(int n) {
+    if (n < 10)
+        return '0' + n;
+    else
+        return 'a' + n - 10;
+}
