@@ -40,11 +40,11 @@ char tohexchar(int n);
 
 // fail fast to find bugs earlier
 #define __ASSERT(expr,msg) if (!(expr)) { \
-    fatal("assertion failed: %s (errno %d)", msg, errno); \
+    fatal("assertion failed: %s (errno %d)", (msg), errno); \
     exit(1); \
 }
-#define IF_ERROR(expr,msg) __ASSERT((expr != -1), msg)
-#define ASSERT(expr) __ASSERT(expr, #expr)
+#define IF_ERROR(expr,msg) __ASSERT(((expr) != -1), msg)
+#define ASSERT(expr) __ASSERT((expr), #expr)
 
 #define bool unsigned char
 #define true 1
