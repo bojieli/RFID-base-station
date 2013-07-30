@@ -21,3 +21,19 @@ char tohexchar(int n) {
     else
         return 'a' + n - 10;
 }
+
+void print_buf(uchar* buf, int len)
+{
+    char *str = malloc(len * 3);
+    int i;
+    for (i=0; i<len; i++) {
+        str[i*3 + 0] = tohexchar(buf[i] >> 4);
+        str[i*3 + 1] = tohexchar(buf[i] & 15);
+        str[i*3 + 2] = ' ';
+    }
+    str[len*3 - 1] = '\0';
+
+    debug("received ID: %s", str);
+
+    free(str);
+}

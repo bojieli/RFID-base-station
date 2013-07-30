@@ -1,3 +1,4 @@
+#include "common.h"
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include "nrf.h"
@@ -26,7 +27,7 @@ static void batch(uchar* buf)
         struct timeval now;
         gettimeofday(&now, NULL);
         int total_time = (now.tv_usec - begin.tv_usec) / 1000 + (now.tv_sec - begin.tv_sec) * 1000;
-        print_buf(buf);
+        print_buf(buf, BUF_SIZE);
         printf("time %6d diff %6d rate %7d ", total_time, total_time - last_time, (int)(total*1000000.0/total_time));
         last_time = total_time;
         printf("total %8d wrong %8d rate %lf", total, wrong, wrong * 1.0 / total);
@@ -49,7 +50,7 @@ static void test_multiple(uchar* buf)
     for (i=0; i<BUF_SIZE-1; i++)
         if (buf[i] != i+1) {
             printf("invalid packet: ");
-            print_buf(buf);
+            print_buf(buf, BUF_SIZE);
             printf("\n");
             fflush(stdout);
             return;
@@ -106,7 +107,7 @@ static void on_irq(void)
         else if (batch_count > 0)
             batch(buf);
         else {
-            print_buf(buf);
+            print_buf(buf, BUF_SIZE);
             printf("\n");
         }
     } else {

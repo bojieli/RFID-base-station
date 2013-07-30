@@ -7,10 +7,6 @@
 
 extern int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 
-typedef unsigned char uchar;
-#define true 1
-#define false 0
-
 #define TX_ADR_WIDTH   5  
 extern int TX_PLOAD_WIDTH;
 #define RX_ADR_WIDTH   5

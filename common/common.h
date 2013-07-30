@@ -18,10 +18,6 @@
 
 extern FILE *logfile;
 
-// common.c
-char* print_time(void);
-char tohexchar(int n);
-
 // strip path in __FILE__
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -49,6 +45,12 @@ char tohexchar(int n);
 #define bool unsigned char
 #define true 1
 #define false 0
+#define uchar unsigned char
+
+// common.c
+char* print_time(void);
+char tohexchar(int n);
+void print_buf(uchar* buf, int len);
 
 // dict.c
 typedef struct dict_item {

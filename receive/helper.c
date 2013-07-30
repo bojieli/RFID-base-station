@@ -4,20 +4,6 @@ int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 struct timeval begin;
 static pthread_mutex_t irq_lock;
 
-static void print_buf(uchar* buf)
-{
-    char str[BUF_SIZE * 3];
-    int i;
-    for (i=0; i<BUF_SIZE; i++) {
-        str[i*3 + 0] = tohexchar(buf[i] >> 4);
-        str[i*3 + 1] = tohexchar(buf[i] & 15);
-        str[i*3 + 2] = ' ';
-    }
-    str[BUF_SIZE*3 - 1] = '\0';
-
-    debug("received ID: %s", str);
-}
-
 static void blink_led()
 {
     static int led_last_time;

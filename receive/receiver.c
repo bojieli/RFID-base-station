@@ -17,15 +17,15 @@ static void on_irq(void)
     uchar buf[BUF_SIZE];
     int flag = nRF24L01_RxPacket(buf);
 
+    pthread_mutex_unlock(&irq_lock);
+
     if (flag) {
         add_to_queue(buf, BUF_SIZE);
         blink_led();
-        print_buf(buf);
+        print_buf(buf, BUF_SIZE);
     } else {
         fatal("Receive failed on IRQ\n");
     }
-
-    pthread_mutex_unlock(&irq_lock);
 }
 
 int forked_main(int argc, char** argv)

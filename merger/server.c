@@ -27,11 +27,8 @@ static void handle_student(char* id, int action) {
 
 static void handle_packet(unsigned char* pack, int action) {
     if (!check_packet(pack)) {
-        fprintf(logfile, "Received invalid packet: ");
-        int i;
-        for (i=0; i<PACKET_SIZE; i++)
-            fprintf(logfile, "%02x ", pack[i]);
-        fprintf(logfile, "\n");
+        debug("Received invalid packet: ");
+        print_buf(pack, PACKET_SIZE);
         return;
     }
 
@@ -93,7 +90,9 @@ static int msg_loop(int sockfd) {
                     continue;
                 }
                 receiver_alive[i] = true;
-                handle_packet(buf, i);
+                // ID with first byte 0x00 is for internal testing, drop it
+                if (buf[0] != 0)
+                    handle_packet(buf, i);
                 free(buf);
             }
         }
