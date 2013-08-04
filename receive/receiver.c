@@ -28,7 +28,7 @@ static void on_irq(void)
     }
 }
 
-int forked_main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     init_params(argc, argv);
     common_init();
@@ -49,24 +49,4 @@ int forked_main(int argc, char** argv)
     // if sender finds error, exit
     pthread_join(tid_sender, NULL);
     return 0;
-}
-
-int main(int argc, char** argv)
-{
-    while (1) {
-        int flag = fork();
-        if (flag == -1) {
-            fatal_stderr("fork failed");
-            return 1;
-        }
-        if (flag == 0) { // child
-            forked_main(argc, argv);
-            return 0;
-        } else {
-            debug_stderr("child %d created", flag);
-            waitpid(flag, NULL, 0);
-            debug_stderr("child %d terminated", flag);
-        }
-        sleep(1); // prevent fast respawn
-    }
 }
