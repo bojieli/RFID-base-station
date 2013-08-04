@@ -97,6 +97,9 @@ fi
 # install helper scripts
 cp -a $CODE_BASE/deploy/helper/* /usr/local/bin/
 
+# install logrotate
+cp -a $CODE_BASE/deploy/logrotate.d/* /etc/logrotate.d/
+
 # set hostname
 if [ "$ACTION" == "install" ]; then
     echo $TARGET > /etc/hostname
