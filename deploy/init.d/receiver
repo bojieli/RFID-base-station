@@ -60,10 +60,7 @@ receiver_start() {
 
 do_stop()
 {
-    # stop master process
 	start-stop-daemon --stop --quiet --oknodo --retry=TERM/5/KILL/5 --pidfile $PID_FILE
-    # stop child process
-    start-stop-daemon --stop --quiet --oknodo --retry=TERM/5/KILL/5 --exec $DAEMON
 }
 
 case "$1" in
