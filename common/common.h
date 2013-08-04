@@ -15,9 +15,10 @@
 #include <pthread.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <signal.h>
 
 extern FILE *logfile;
-extern char* logfile_saved;
+extern char *logfile_saved;
 
 // strip path in __FILE__
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -53,6 +54,7 @@ char* print_time(void);
 char tohexchar(int n);
 void print_buf(uchar* buf, int len);
 void init_sigactions(void);
+void init_params(int argc, char** argv);
 
 // dict.c
 typedef struct dict_item {
@@ -80,6 +82,7 @@ char* urlencode(char* msg);
 // config.c
 bool load_config(const char* config_file);
 char* get_config(const char* key);
+bool reload_configs(void);
 
 // global configs
 extern int PACKET_SIZE;

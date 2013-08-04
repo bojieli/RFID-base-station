@@ -38,14 +38,15 @@ void print_buf(uchar* buf, int len)
     free(str);
 }
 
-static void sighup_action(void) {
+static void sighup_action(int signo) {
     debug("caught signal SIGHUP");
     reload_configs();
 }
 
-char* logfile_saved;
+FILE *logfile = NULL;
+char *logfile_saved = NULL;
 
-static void sigusr1_action(void) {
+static void sigusr1_action(int signo) {
     debug("caught signal SIGUSR1");
     if (logfile_saved) {
         FILE *fp;
@@ -73,3 +74,25 @@ void init_sigactions(void)
     sighup.sa_flags = 0;
     sigaction(SIGUSR1, NULL, &sigusr1);
 }
+
+void init_params(int argc, char** argv)
+{
+    if (argc != 2 && argc != 3) {
+        fatal_stderr("Usage: %s <config-file> [<log-file>]", argv[0]);
+        exit(1);
+    }
+    logfile = (argc == 3 ? fopen(argv[2], "a") : stderr);
+    if (logfile == NULL) {
+        fatal_stderr("Cannot open logfile");
+        exit(1);
+    }
+    logfile_saved = (argc == 3 ? strdup(argv[2]) : NULL);
+
+    if (!load_config(argv[1])) {
+        fatal("error parsing config file");
+        exit(1);
+    }
+
+    init_sigactions();
+}
+

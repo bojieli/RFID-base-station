@@ -1,7 +1,5 @@
 #include "merger.h"
 
-FILE *logfile = NULL;
-
 pthread_mutex_t lock_notify_queue;
 pthread_mutex_t lock_timers;
 
@@ -27,25 +25,11 @@ static void load_global_configs() {
     REQUEST_SIZE = ID_SIZE + 2;
 }
 
-int main(int argc, char** argv) {
-    if (argc != 2 && argc != 3) {
-        fprintf(stderr, "Usage: merger <config-file> [<log-file>]\n");
-        exit(1);
-    }
-    logfile = (argc == 3 ? fopen(argv[2], "a") : stderr);
-    if (logfile == NULL) {
-        fatal_stderr("Cannot open logfile");
-        exit(1);
-    }
-    logfile_saved = strdup(logfile);
+int main(int argc, char** argv)
+{
+    init_params(argc, argv);
 
-    if (!load_config(argv[1])) {
-        fatal("error parsing config file");
-        return 1;
-    }
     load_global_configs();
-
-    init_sigactions();
 
     pthread_mutex_init(&lock_notify_queue, NULL);
     pthread_mutex_init(&lock_timers, NULL);

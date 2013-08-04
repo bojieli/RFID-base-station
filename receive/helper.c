@@ -1,4 +1,4 @@
-FILE *logfile = NULL;
+// this file should not be compiled separately
 
 int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 struct timeval begin;
@@ -23,27 +23,6 @@ static void load_global_configs() {
     CE_PIN  = atoi(get_config("pin.CE"));
     LED_PIN = atoi(get_config("pin.LED"));
     LED2_PIN = atoi(get_config("pin.LED2"));
-}
-
-static void init_params(int argc, char** argv)
-{
-    if (argc != 2 && argc != 3) {
-        fprintf(stderr, "Usage: receiver <config-file> [<log-file>]\n");
-        exit(1);
-    }
-    logfile = (argc == 3 ? fopen(argv[2], "a") : stderr);
-    if (logfile == NULL) {
-        fprintf(stderr, "Cannot open logfile\n");
-        exit(1);
-    }
-    logfile_saved = strdup(logfile);
-
-    if (!load_config(argv[1])) {
-        fatal("error parsing config file");
-        exit(1);
-    }
-
-    init_sigactions();
 }
 
 static void common_init(void)

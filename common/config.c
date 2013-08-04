@@ -6,7 +6,8 @@ struct config {
     struct config* next;
 };
 static struct config* conf = NULL;
-static FILE* fp;
+static FILE* fp = NULL; // config file
+static char* saved_conf_file = NULL;
 
 char* get_config(const char* key)
 {
@@ -82,8 +83,6 @@ readvalue:
     goto readvalue;
 }
 
-static char* conf_file;
-
 bool load_config(const char* config_file)
 {
     fp = fopen(config_file, "r");
@@ -91,15 +90,17 @@ bool load_config(const char* config_file)
         fatal("Cannot open config file %s", config_file);
         return false;
     }
-    conf_file = strdup(config_file);
+    saved_conf_file = strdup(config_file);
     return parse_config();
 }
 
-bool reload_config()
+bool reload_configs()
 {
-    fp = fopen(conf_file, "r");
+    if (saved_conf_file == NULL)
+        return false;
+    fp = fopen(saved_conf_file, "r");
     if (fp == NULL) {
-        fatal("Cannot open config file %s", config_file);
+        fatal("Cannot open config file %s", saved_conf_file);
         return false;
     }
     return parse_config();
