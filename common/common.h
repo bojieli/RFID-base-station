@@ -17,6 +17,7 @@
 #include <stdarg.h>
 
 extern FILE *logfile;
+extern char* logfile_saved;
 
 // strip path in __FILE__
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -51,6 +52,7 @@ extern FILE *logfile;
 char* print_time(void);
 char tohexchar(int n);
 void print_buf(uchar* buf, int len);
+void init_sigactions(void);
 
 // dict.c
 typedef struct dict_item {

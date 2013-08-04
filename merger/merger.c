@@ -37,12 +37,15 @@ int main(int argc, char** argv) {
         fatal_stderr("Cannot open logfile");
         exit(1);
     }
+    logfile_saved = strdup(logfile);
 
     if (!load_config(argv[1])) {
         fatal("error parsing config file");
         return 1;
     }
     load_global_configs();
+
+    init_sigactions();
 
     pthread_mutex_init(&lock_notify_queue, NULL);
     pthread_mutex_init(&lock_timers, NULL);

@@ -37,3 +37,39 @@ void print_buf(uchar* buf, int len)
 
     free(str);
 }
+
+static void sighup_action(void) {
+    debug("caught signal SIGHUP");
+    reload_configs();
+}
+
+char* logfile_saved;
+
+static void sigusr1_action(void) {
+    debug("caught signal SIGUSR1");
+    if (logfile_saved) {
+        FILE *fp;
+        fp = fopen(logfile_saved, "a");
+        if (fp) {
+            debug("this logfile is going to be logrotated");
+            logfile = fp;
+            debug("logfile successfully reopened");
+        } else {
+            fatal("cannot open new logfile");
+        }
+    }
+}
+
+void init_sigactions(void)
+{
+    struct sigaction sighup, sigusr1;
+    sighup.sa_handler = sighup_action;
+    sigemptyset(&sighup.sa_mask);
+    sighup.sa_flags = 0;
+    sigaction(SIGHUP, NULL, &sighup);
+
+    sigusr1.sa_handler = sigusr1_action;
+    sigemptyset(&sigusr1.sa_mask);
+    sighup.sa_flags = 0;
+    sigaction(SIGUSR1, NULL, &sigusr1);
+}

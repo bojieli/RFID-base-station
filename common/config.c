@@ -82,9 +82,22 @@ readvalue:
     goto readvalue;
 }
 
+static char* conf_file;
+
 bool load_config(const char* config_file)
 {
     fp = fopen(config_file, "r");
+    if (fp == NULL) {
+        fatal("Cannot open config file %s", config_file);
+        return false;
+    }
+    conf_file = strdup(config_file);
+    return parse_config();
+}
+
+bool reload_config()
+{
+    fp = fopen(conf_file, "r");
     if (fp == NULL) {
         fatal("Cannot open config file %s", config_file);
         return false;
