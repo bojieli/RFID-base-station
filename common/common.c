@@ -53,6 +53,7 @@ static void sigusr1_action(int signo) {
         fp = fopen(logfile_saved, "a");
         if (fp) {
             debug("this logfile is going to be logrotated");
+            fclose(logfile);
             logfile = fp;
             debug("logfile successfully reopened");
         } else {
@@ -71,7 +72,7 @@ void init_sigactions(void)
 
     sigusr1.sa_handler = sigusr1_action;
     sigemptyset(&sigusr1.sa_mask);
-    sighup.sa_flags = 0;
+    sigusr1.sa_flags = 0;
     sigaction(SIGUSR1, NULL, &sigusr1);
 }
 
