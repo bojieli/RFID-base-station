@@ -68,12 +68,12 @@ void init_sigactions(void)
     sighup.sa_handler = sighup_action;
     sigemptyset(&sighup.sa_mask);
     sighup.sa_flags = 0;
-    sigaction(SIGHUP, NULL, &sighup);
+    sigaction(SIGHUP, &sighup, NULL);
 
     sigusr1.sa_handler = sigusr1_action;
     sigemptyset(&sigusr1.sa_mask);
     sigusr1.sa_flags = 0;
-    sigaction(SIGUSR1, NULL, &sigusr1);
+    sigaction(SIGUSR1, &sigusr1, NULL);
 }
 
 void init_params(int argc, char** argv)
