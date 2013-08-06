@@ -1,4 +1,4 @@
-/opt/gewuit/rfid/receiver.log
+/opt/gewuit/rfid/log/receiver.log
 {
 	daily
 	missingok
