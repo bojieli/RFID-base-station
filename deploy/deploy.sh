@@ -69,10 +69,11 @@ mkdir -p $INSTALL_DIR/{bin,etc,log}
 # must stop services before replacing binaries
 /etc/init.d/receiver stop
 /etc/init.d/merger stop
-cp -a $CODE_BASE/build/* $INSTALL_DIR/bin/
+cp $CODE_BASE/build/* $INSTALL_DIR/bin/
 
 # generate config files
 if [ "$ACTION" == "install" ]; then
+    # preserve file owner for easy editing of configs
     cp -a $CODE_BASE/config/* $INSTALL_DIR/etc/
     MERGER_CONF=$INSTALL_DIR/etc/merger.ini
     sed -i "s/^listen.local_ip = .*$/listen.local_ip = $MASTER_IP/" $MERGER_CONF
@@ -82,7 +83,7 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install init scripts
-cp -a $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
+cp $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
     if [ "$TARGET" == "master" ]; then 
         insserv -d /etc/init.d/merger # fix possible warnings
@@ -95,10 +96,11 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install helper scripts
-cp -a $CODE_BASE/deploy/helper/* /usr/local/bin/
+cp $CODE_BASE/deploy/helper/* /usr/local/bin/
 
 # install logrotate
-cp -a $CODE_BASE/deploy/logrotate.d/* /etc/logrotate.d/
+# logrotate configs must be owned by root
+cp $CODE_BASE/deploy/logrotate.d/* /etc/logrotate.d/
 
 # set hostname
 if [ "$ACTION" == "install" ]; then
