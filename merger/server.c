@@ -32,7 +32,7 @@ static void handle_packet(unsigned char* pack, int action) {
         return;
     }
 
-    char* id = malloc(ID_SIZE+1);
+    char* id = safe_malloc(ID_SIZE+1);
     int i;
     for (i=0; i<PACKET_SIZE; i++) {
         id[i*2] = tohexchar(pack[i] >> 4);
@@ -60,7 +60,7 @@ static int msg_loop(int sockfd) {
         // accept connection
         if (fds[2].revents & POLLIN) {
             struct sockaddr_in client_addr;
-            unsigned sin_size = sizeof(client_addr);
+            socklen_t sin_size = sizeof(client_addr);
             int newfd;
             IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
             char* client_addr_str = inet_ntoa(client_addr.sin_addr);
@@ -78,7 +78,7 @@ static int msg_loop(int sockfd) {
         int i;
         for (i=0; i<2; i++) {
             if (fds[i].revents & POLLIN) {
-                unsigned char* buf = malloc(PACKET_SIZE);
+                unsigned char* buf = safe_malloc(PACKET_SIZE);
                 int readlen = recvn(fds[i].fd, buf, PACKET_SIZE);
                 if (readlen == -1) {
                     fatal("read from %s", i ? "slave" : "master");

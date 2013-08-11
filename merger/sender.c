@@ -1,23 +1,5 @@
 #include "merger.h"
 
-// return received bytes on success, -1 on failure
-int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
-    char *encoded = urlencode(buf);
-    int len = strlen(encoded);
-    char *body = malloc(len + MAX_HEADERS_LENGTH);
-    snprintf(body, len + MAX_HEADERS_LENGTH,
-        "token=%s&data=%s",
-        get_config("cloud.access_token"),
-        encoded);
-    free(encoded);
-    int flag = http_post(get_config("cloud.remote_host"),
-        atoi(get_config("cloud.remote_port")),
-        remote_path,
-        body, strlen(body), recvbuf);
-    free(body);
-    return flag;
-}
-
 static void send_heartbeat() {
     char* recv_buf = NULL;
     debug("heartbeat");
@@ -47,7 +29,7 @@ static void commit_notify_queue() {
 
     pthread_mutex_lock(&lock_notify_queue);
 
-    send_buf = malloc(notify_queue_len+1);
+    send_buf = safe_malloc(notify_queue_len+1);
     memcpy(send_buf, notify_queue, notify_queue_len);
     send_buf[notify_queue_len] = '\0';
 

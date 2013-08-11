@@ -75,7 +75,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
     MY_IF_ERROR(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)), "connect")
     debug("connected to server at %s:%d", inet_ntoa(server_addr.sin_addr), remote_port);
 
-    tcp = malloc(len + MAX_HEADERS_LENGTH);
+    tcp = safe_malloc(len + MAX_HEADERS_LENGTH);
     snprintf(tcp, len + MAX_HEADERS_LENGTH,
         "POST %s HTTP/1.1\r\n"
         "Host: %s\r\n"
@@ -98,7 +98,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 
 #define BUF_SIZE 1024
     char buf[BUF_SIZE] = {0};
-    received = malloc(BUF_SIZE);
+    received = safe_malloc(BUF_SIZE);
     bool in_payload = false;
     while (1) {
         unsigned int curr_time = (unsigned int)time(NULL);
@@ -116,7 +116,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
             break;
 
         if (in_payload) {
-            *recvbuf = realloc(*recvbuf, totalbytes + recvbytes);
+            *recvbuf = safe_realloc(*recvbuf, totalbytes + recvbytes);
             ASSERT(*recvbuf != NULL)
             memcpy(*recvbuf + totalbytes, buf, recvbytes);
             totalbytes += recvbytes;
@@ -132,7 +132,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
                 if (payload != NULL) {
                     payload += 4;
                     int newbytes = recvbytes - (payload - buf);
-                    *recvbuf = malloc(newbytes);
+                    *recvbuf = safe_malloc(newbytes);
                     totalbytes = newbytes;
                     in_payload = true;
                 }
@@ -150,7 +150,7 @@ out:
 }
 
 char* urlencode(char* msg) {
-    char* buf = malloc(strlen(msg) * 3 + 1);
+    char* buf = safe_malloc(strlen(msg) * 3 + 1);
     char* cur = buf;
     const char hexchars[17] = "0123456789abcdef";
     while (*msg != '\0') {

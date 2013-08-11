@@ -11,7 +11,7 @@ static void notify(char* student_no, bool action) {
 
     if (notify_queue_len + REQUEST_SIZE > notify_queue_alloc_size) {
         notify_queue_alloc_size = (notify_queue_alloc_size + REQUEST_SIZE) * 2;
-        notify_queue = realloc(notify_queue, notify_queue_alloc_size);
+        notify_queue = safe_realloc(notify_queue, notify_queue_alloc_size);
         debug("realloc notify_queue size to %d", notify_queue_alloc_size);
     }
     // see merger.c for cloud request format
@@ -39,7 +39,7 @@ static void check_timers() {
     int curr_time = (int)time(NULL);
 
     pthread_mutex_lock(&lock_timers);
-    // WARNING: mutex is not reentrant, so please do lock it before unlock!
+    // WARNING: mutex is not reentrant, so do NOT lock it again before unlock!
 
     dict prev_timer = timers;
     while (prev_timer->next != NULL) {

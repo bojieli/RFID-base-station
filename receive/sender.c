@@ -13,7 +13,7 @@ void add_to_queue(unsigned char* buf, size_t len) {
 
     if (send_queue_len + len > send_queue_size) {
         send_queue_size = (send_queue_size + len) * 2;
-        send_queue = realloc(send_queue, send_queue_size);
+        send_queue = safe_realloc(send_queue, send_queue_size);
         debug("realloc send_queue size to %d", send_queue_size);
     }
     memcpy(send_queue + send_queue_len, buf, len);
@@ -54,10 +54,10 @@ static bool do_send(void) {
         pthread_mutex_lock(&lock_sender);
         if (send_queue_len == 0) { // send heartbeat with all bytes zero
             sendlen = atoi(get_config("master.heartbeat_packlen"));
-            sendbuf = malloc(sendlen);
+            sendbuf = safe_malloc(sendlen);
             bzero(sendbuf, sendlen);
         } else { // send normal data
-            sendbuf = malloc(send_queue_len);
+            sendbuf = safe_malloc(send_queue_len);
             memcpy(sendbuf, send_queue, send_queue_len);
             sendlen = send_queue_len;
             send_queue_len = 0;

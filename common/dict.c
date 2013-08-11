@@ -1,7 +1,7 @@
 #include "common.h"
 
 dict new_dict(void) {
-    dict new = malloc(sizeof(dict_item));
+    dict new = safe_malloc(sizeof(dict_item));
     new->key = NULL;
     new->next = NULL;
     new->value = 0;
@@ -26,7 +26,7 @@ bool set(dict d, char* key, int value) {
         }
         curr = curr->next;
     }
-    dict new = malloc(sizeof(dict_item));
+    dict new = safe_malloc(sizeof(dict_item));
     new->key = strdup(key);
     new->next = d->next;
     new->value = value;

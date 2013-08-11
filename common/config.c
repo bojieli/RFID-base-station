@@ -24,7 +24,7 @@ char* get_config(const char* key)
 // note: a value with an existing key overrides the old one
 static void add_config(char* key, char* value)
 {
-    struct config *new = malloc(sizeof(struct config));
+    struct config *new = safe_malloc(sizeof(struct config));
     new->key = strdup(key);
     new->value = strdup(value);
     new->next = conf;

@@ -24,7 +24,7 @@ char tohexchar(int n) {
 
 void print_buf(uchar* buf, int len)
 {
-    char *str = malloc(len * 3);
+    char *str = safe_malloc(len * 3);
     int i;
     for (i=0; i<len; i++) {
         str[i*3 + 0] = tohexchar(buf[i] >> 4);
@@ -95,5 +95,36 @@ void init_params(int argc, char** argv)
     }
 
     init_sigactions();
+}
+
+#define MSG_MAXLEN 1024
+bool report_it_now(char* format, ...) {
+    va_list arg;
+    va_start(arg, format);
+    char msg[MSG_MAXLEN] = {0};
+    vsnprintf(msg, MSG_MAXLEN, format, arg);
+    va_end(arg);
+
+    debug("REPORT IT NOW: %s", msg);
+    char* recv_buf = NULL;
+    return cloud_send(get_config("paths.reportitnow"), msg, &recv_buf);
+}
+
+// return received bytes on success, -1 on failure
+int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
+    char *encoded = urlencode(buf);
+    int len = strlen(encoded);
+    char *body = safe_malloc(len + MAX_HEADERS_LENGTH);
+    snprintf(body, len + MAX_HEADERS_LENGTH,
+        "token=%s&data=%s",
+        get_config("cloud.access_token"),
+        encoded);
+    free(encoded);
+    int flag = http_post(get_config("cloud.remote_host"),
+        atoi(get_config("cloud.remote_port")),
+        remote_path,
+        body, strlen(body), recvbuf);
+    free(body);
+    return flag;
 }
 

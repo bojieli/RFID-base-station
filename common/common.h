@@ -44,6 +44,22 @@ extern char *logfile_saved;
 #define IF_ERROR(expr,msg) __ASSERT(((expr) != -1), msg)
 #define ASSERT(expr) __ASSERT((expr), #expr)
 
+#define __safe_alloc_assert(size) \
+    if (__p == NULL) { \
+        report_it_now("failed to allocate %d bytes", (size)); \
+        exit(1); \
+    }
+#define safe_realloc(orig,size) ({ \
+    void *__p = realloc((orig), (size)); \
+    __safe_alloc_assert(size) \
+    __p; \
+})
+#define safe_malloc(size) ({ \
+    void *__p = malloc(size); \
+    __safe_alloc_assert(size) \
+    __p; \
+})
+
 #define bool unsigned char
 #define true 1
 #define false 0
@@ -55,6 +71,8 @@ char tohexchar(int n);
 void print_buf(uchar* buf, int len);
 void init_sigactions(void);
 void init_params(int argc, char** argv);
+bool report_it_now(char* format, ...);
+int cloud_send(const char* remote_path, char* buf, char** recvbuf);
 
 // dict.c
 typedef struct dict_item {

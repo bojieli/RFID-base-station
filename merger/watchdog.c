@@ -1,18 +1,5 @@
 #include "merger.h"
 
-#define MSG_MAXLEN 1024
-bool report_it_now(char* format, ...) {
-    va_list arg;
-    va_start(arg, format);
-    char msg[MSG_MAXLEN] = {0};
-    vsnprintf(msg, MSG_MAXLEN, format, arg);
-    va_end(arg);
-
-    debug("REPORT IT NOW: %s", msg);
-    char* recv_buf = NULL;
-    return cloud_send(get_config("paths.reportitnow"), msg, &recv_buf);
-}
-
 static int get_conf(const char* conf) {
     int value = atoi(get_config(conf));
     if (value < 1) {
