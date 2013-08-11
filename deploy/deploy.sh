@@ -12,7 +12,7 @@ isip()
 }
 
 if [ -z "$1" ]; then
-    echo "Usage: ./deploy.sh [ master <ip-of-slave> <access-token> | slave <ip-of-master> | update ]"
+    echo "Usage: ./deploy.sh [ master <ip-of-slave> <access-token> | slave <ip-of-master> <access-token> | update ]"
     exit 1
 elif [ "$1" == "update" ]; then
     ACTION=update
@@ -40,11 +40,15 @@ elif [ "$1" == "slave" ]; then
         echo "master IP is invalid"
         exit 1
     fi
+    if [ -z "$3" ]; then
+        echo "Please specify access token"
+        exit 1
+    fi
     ACTION=install
     TARGET=$1
     MASTER_IP=$2
     SLAVE_IP="127.0.0.1"
-    ACCESS_TOKEN="slave-fake-token"
+    ACCESS_TOKEN=$3
 else
     echo "Please specify master, slave or update as first parameter"
     exit 1
