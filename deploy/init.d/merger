@@ -83,7 +83,13 @@ case "$1" in
 	;;
 
   reload|force-reload)
-	log_warning_msg "Reloading merger: reload is not supported"
+	log_daemon_msg "Reloading merger" "merger"
+    if [ ! -f "$PIDFILE" ]; then
+        log_failure_msg "merger is not running"
+        log_end_msg 1
+    fi
+    kill -HUP `cat $PIDFILE`
+    log_end_msg 0
 	;;
 
   restart)
