@@ -14,11 +14,12 @@ static void check_lock(pthread_mutex_t *lock, const char* msg) {
     timeout.tv_sec = get_conf("watchdog.lock_timeout");
     timeout.tv_nsec = 0;
 
-    if (0 == pthread_mutex_timedlock(lock, &timeout)) { // lock acquired
+    int flag = pthread_mutex_timedlock(lock, &timeout);
+    if (flag == 0) { // lock acquired
         pthread_mutex_unlock(lock);
         return;
     }
-    report_it_now("watchdog: cannot acquire lock '%s' in %ld seconds", msg, timeout.tv_sec);
+    report_it_now("watchdog: cannot acquire lock '%s' in %ld seconds, errno %d", msg, timeout.tv_sec, flag);
 }
 
 bool receiver_alive[2];
