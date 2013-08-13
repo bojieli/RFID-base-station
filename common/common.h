@@ -36,6 +36,9 @@ extern char *logfile_saved;
 #define fatal(format, ...) debug("FATAL: " format, ##__VA_ARGS__)
 #define fatal_stderr(format, ...) debug_stderr("FATAL: " format, ##__VA_ARGS__)
 
+#define LOG_VERBOSE() (atoi(get_config("debug.log_verbose")) == 1) 
+#define debug_verbose(...) if (LOG_VERBOSE()) debug(__VA_ARGS__);
+
 // fail fast to find bugs earlier
 #define __ASSERT(expr,msg) if (!(expr)) { \
     fatal("assertion failed: %s (errno %d)", (msg), errno); \

@@ -18,7 +18,7 @@ static void handle_student(char* id, int action) {
     };
     int old_state = get(students, id);
     int new_state = state_table[old_state][action];
-    debug("student %s at %s, state %d => %d", id, action ? "slave" : "master", old_state, new_state);
+    debug_verbose("student %s at %s, state %d => %d", id, action ? "slave" : "master", old_state, new_state);
     set(students, id, new_state);
     clear_timeout(id);
     if (new_state != 0)

@@ -2,7 +2,7 @@
 {
 	daily
 	missingok
-	rotate 7
+	rotate 52
 	compress
 	notifempty
 	sharedscripts
