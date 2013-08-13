@@ -2,9 +2,8 @@
 {
 	daily
 	missingok
-	rotate 10
+	rotate 7
 	compress
-	delaycompress
 	notifempty
 	sharedscripts
 	postrotate
