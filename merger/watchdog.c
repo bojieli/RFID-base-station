@@ -10,16 +10,18 @@ static int get_conf(const char* conf) {
 }
 
 static void check_lock(pthread_mutex_t *lock, const char* msg) {
-    struct timespec timeout;
-    timeout.tv_sec = get_conf("watchdog.lock_timeout");
-    timeout.tv_nsec = 0;
+    struct timespec abstime;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    abstime.tv_sec = tv.tv_sec + get_conf("watchdog.lock_timeout");
+    abstime.tv_nsec = tv.tv_usec * 1000;
 
-    int flag = pthread_mutex_timedlock(lock, &timeout);
+    int flag = pthread_mutex_timedlock(lock, &abstime);
     if (flag == 0) { // lock acquired
         pthread_mutex_unlock(lock);
         return;
     }
-    report_it_now("watchdog: cannot acquire lock '%s' in %ld seconds, errno %d", msg, timeout.tv_sec, flag);
+    report_it_now("watchdog: cannot acquire lock '%s', errno %d", msg, flag);
 }
 
 bool receiver_alive[2];
