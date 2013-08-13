@@ -63,7 +63,9 @@ static void check_timers() {
 void init_timeout(void) {
     debug("timeout thread begin");
     while (1) {
+        debug("begin checking timers");
         check_timers();
+        debug("end checking timers");
         sleep(1); // timers are in 1 second resolution
     }
 }

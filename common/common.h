@@ -16,6 +16,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <signal.h>
+#include <sys/time.h>
 
 extern FILE *logfile;
 extern char *logfile_saved;
