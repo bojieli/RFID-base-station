@@ -38,14 +38,19 @@ static void load_global_configs() {
     REQUEST_SIZE = ID_SIZE + 2;
 }
 
-static void gen_student_id(char* id) {
+static void gen_student_id(char* str) {
+    unsigned char id[PACKET_SIZE];
     id[0] = id[1] = 0x01;
     int i;
-    for (i=2; i<ID_SIZE-1; i++)
+    for (i=2; i<PACKET_SIZE-1; i++)
         id[i] = rand() & 0xFF;
-    id[ID_SIZE-1] = 0;
-    for (i=0; i<ID_SIZE-1; i++)
-        id[ID_SIZE-1] ^= id[i];
+    id[PACKET_SIZE-1] = 0;
+    for (i=0; i<PACKET_SIZE-1; i++)
+        id[PACKET_SIZE-1] ^= id[i];
+    for (i=0; i<PACKET_SIZE; i++) {
+        str[i<<1] = tohexchar(id[i] >> 4);
+        str[(i<<1)+1] = tohexchar(id[i] & 0xF);
+    }
 }
 
 int main(int argc, char **argv) {
