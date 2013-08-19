@@ -41,9 +41,13 @@ static void commit_notify_queue() {
 send: {
     debug("sending notify queue (length %d)...", send_len);
     char* recv_buf = NULL;
-    if (cloud_send(get_config("paths.upload"), send_buf, &recv_buf) > 0 && strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
-        free(send_buf);
-        send_buf = NULL;
+    if (cloud_send(get_config("paths.upload"), send_buf, &recv_buf) > 0) {
+        if (strcmp(recv_buf, get_config("cloud.ok_response")) == 0) {
+            free(send_buf);
+            send_buf = NULL;
+        } else {
+            debug("cloud returned: %s (%s expected)", recv_buf, get_config("cloud.ok_response"));
+        }
     }
 }
 }
