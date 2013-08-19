@@ -61,8 +61,10 @@ int main(int argc, char **argv) {
     }
     load_global_configs();
     pthread_mutex_init(&lock_notify_queue, NULL);
-
     srand(time(NULL));
+
+    pthread_t tid_server;
+    pthread_create(&tid_server, NULL, (void*(*)(void*))&init_sender, NULL);
 
     while (true) {
         char student_id[ID_SIZE];
