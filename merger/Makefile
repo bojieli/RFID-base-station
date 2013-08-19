@@ -8,6 +8,8 @@ REMOTE_DIR=~/rfid-base-station
 
 default:
 	gcc ${CFLAGS} -o ${BUILD_DIR}/merger merger.c server.c sender.c timeout.c watchdog.c ${COMMON_DIR}/common.c ${COMMON_DIR}/dict.c ${COMMON_DIR}/http.c ${COMMON_DIR}/config.c -lpthread
+
+test-notify:
 	gcc ${CFLAGS} -o ${BUILD_DIR}/test-notify test-notify.c sender.c ${COMMON_DIR}/common.c ${COMMON_DIR}/dict.c ${COMMON_DIR}/http.c ${COMMON_DIR}/config.c -lpthread
 
 upload:

@@ -54,6 +54,11 @@ int main(int argc, char **argv) {
         speed = atoi(argv[1]);
     int interval = 1000000 / speed;
 
+    logfile = stderr;
+    if (!load_config("/opt/gewuit/rfid/etc/merger.ini")) {
+        fatal("error parsing config file");
+        exit(1);
+    }
     load_global_configs();
     pthread_mutex_init(&lock_notify_queue, NULL);
 
