@@ -116,7 +116,7 @@ static void on_irq(void)
 
 }
 
-#define CONFIG_FILE "../config/receive.ini"
+#define CONFIG_FILE "../config/receiver.ini"
 int main(int argc, char** argv)
 {
     logfile = stderr; 
