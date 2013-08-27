@@ -26,15 +26,23 @@ static void commit_notify_queue() {
 
     if (notify_queue_len == 0)
         return;
+    if (notify_queue_len > get_config("http.max_data_len")) {
+        report_it_now("Notify queue too long (%d bytes)", notify_queue_len);
+        send_len = get_config("http.max_data_len");
+    } else
+        send_len = 0; // get full queue length after acquiring the lock
 
     pthread_mutex_lock(&lock_notify_queue);
 
-    send_buf = safe_malloc(notify_queue_len+1);
-    memcpy(send_buf, notify_queue, notify_queue_len);
-    send_buf[notify_queue_len] = '\0';
+    if (send_len == 0) // not exceeding max_data_len
+        send_len = notify_queue_len;
 
-    send_len = notify_queue_len;
-    notify_queue_len = 0;
+    send_buf = safe_malloc(send_len+1);
+    // send from tail of queue (should be called stack?)
+    memcpy(send_buf, notify_queue + notify_queue_len - send_len, send_len);
+    send_buf[send_len] = '\0';
+
+    notify_queue_len -= send_len;
 
     pthread_mutex_unlock(&lock_notify_queue);
 
