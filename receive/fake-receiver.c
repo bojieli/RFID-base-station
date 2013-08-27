@@ -18,10 +18,10 @@ int main(int argc, char** argv)
     int BUF_SIZE = atoi(get_config("nrf.RX_PLOAD_WIDTH"));
     while (true) {
         unsigned char buf[BUF_SIZE];
-        buf[0] = 0;
+        buf[0] = 1;
         int i;
         for (i=1; i<BUF_SIZE-1; i++)
-            buf[i] = i;
+            buf[i] = i-1;
         buf[BUF_SIZE-1] = 0;
         for (i=0; i<BUF_SIZE-1; i++)
             buf[BUF_SIZE-1] ^= buf[i];
