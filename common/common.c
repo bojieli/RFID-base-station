@@ -109,7 +109,10 @@ bool report_it_now(char* format, ...) {
 
     debug("REPORT IT NOW: %s", msg);
     char* recv_buf = NULL;
-    return cloud_send(get_config("paths.reportitnow"), msg, &recv_buf);
+    int flag = cloud_send(get_config("paths.reportitnow"), msg, &recv_buf);
+    if (recv_buf)
+        free(recv_buf);
+    return flag;
 }
 
 // return received bytes on success, -1 on failure

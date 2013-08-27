@@ -4,6 +4,8 @@ static void send_heartbeat() {
     char* recv_buf = NULL;
     debug("heartbeat");
     cloud_send(get_config("paths.heartbeat"), "", &recv_buf);
+    if (recv_buf)
+        free(recv_buf);
 }
 
 static bool check_heartbeat() {
@@ -50,7 +52,7 @@ send: {
     debug("sending notify queue (length %d)...", send_len);
     char* recv_buf = NULL;
     int received_bytes = cloud_send(get_config("paths.upload"), send_buf, &recv_buf);
-    if (received_bytes > 0) {
+    if (received_bytes > 0 && recv_buf) {
         if (strncmp(recv_buf, get_config("cloud.ok_response"), received_bytes) == 0) {
             free(send_buf);
             send_buf = NULL;
