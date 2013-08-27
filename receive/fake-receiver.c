@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 
     int per_second = 0;
     if (argc >= 2)
-        per_second = atoi(argv[2]);
+        per_second = atoi(argv[1]);
     if (per_second <= 0)
         per_second = 1;
 
