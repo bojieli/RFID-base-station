@@ -3,10 +3,10 @@
 
 int main(int argc, char** argv)
 {
-    init_params(argc, argv);
+    init_params(argc-1, argv+1);
 
     int per_second = 0;
-    if (argc == 3)
+    if (argc >= 2)
         per_second = atoi(argv[2]);
     if (per_second <= 0)
         per_second = 1;
