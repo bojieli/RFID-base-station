@@ -26,9 +26,9 @@ static void commit_notify_queue() {
 
     if (notify_queue_len == 0)
         return;
-    if (notify_queue_len > get_config("http.max_data_len")) {
+    if (notify_queue_len > atoi(get_config("http.max_data_len"))) {
         report_it_now("Notify queue too long (%d bytes)", notify_queue_len);
-        send_len = get_config("http.max_data_len");
+        send_len = atoi(get_config("http.max_data_len"));
     } else
         send_len = 0; // get full queue length after acquiring the lock
 
