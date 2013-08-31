@@ -62,9 +62,13 @@ static void sigusr1_action(int signo) {
     }
 }
 
+static void sigpipe_action(int signo) {
+    report_it_now("caught signal SIGPIPE, errorno %d, ignoring", signo);
+}
+
 void init_sigactions(void)
 {
-    struct sigaction sighup, sigusr1;
+    struct sigaction sighup, sigusr1, sigpipe;
     sighup.sa_handler = sighup_action;
     sigemptyset(&sighup.sa_mask);
     sighup.sa_flags = 0;
@@ -74,6 +78,11 @@ void init_sigactions(void)
     sigemptyset(&sigusr1.sa_mask);
     sigusr1.sa_flags = 0;
     sigaction(SIGUSR1, &sigusr1, NULL);
+
+    sigpipe.sa_handler = sigpipe_action;
+    sigemptyset(&sigpipe.sa_mask);
+    sigpipe.sa_flags = 0;
+    sigaction(SIGPIPE, &sigpipe, NULL);
 }
 
 void init_params(int argc, char** argv)
