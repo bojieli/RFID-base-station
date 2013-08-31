@@ -22,7 +22,8 @@ static void on_irq(void)
     if (flag) {
         add_to_queue(buf, BUF_SIZE);
         blink_led();
-        print_buf(buf, BUF_SIZE);
+        if (LOG_VERBOSE())
+            print_buf(buf, BUF_SIZE);
     } else {
         fatal("Receive failed on IRQ\n");
     }

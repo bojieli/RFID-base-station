@@ -52,7 +52,6 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 
     // dynamically allocated
     char *tcp = NULL;
-    char *received = NULL;
     // the return value
     int totalbytes = 0;
     // HTTP request succeed?
@@ -96,9 +95,8 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
         goto out;
     }
 
-#define BUF_SIZE 1024
+#define BUF_SIZE 4096
     char buf[BUF_SIZE] = {0};
-    received = safe_malloc(BUF_SIZE);
     bool in_payload = false;
     while (1) {
         unsigned int curr_time = (unsigned int)time(NULL);
@@ -106,7 +104,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
             fatal("HTTP request timeout, start %u, now %u", start_time, curr_time);
             goto out;
         }
-        int recvbytes = recv(sockfd, received, BUF_SIZE, 0);
+        int recvbytes = recv(sockfd, buf, BUF_SIZE, 0);
         if (recvbytes == -1) {
             if (errno == EINTR)
                 continue;
@@ -117,7 +115,6 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 
         if (in_payload) {
             *recvbuf = safe_realloc(*recvbuf, totalbytes + recvbytes);
-            ASSERT(*recvbuf != NULL)
             memcpy(*recvbuf + totalbytes, buf, recvbytes);
             totalbytes += recvbytes;
         } else {
@@ -133,6 +130,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
                     payload += 4;
                     int newbytes = recvbytes - (payload - buf);
                     *recvbuf = safe_malloc(newbytes);
+                    memcpy(*recvbuf, payload, newbytes);
                     totalbytes = newbytes;
                     in_payload = true;
                 }
@@ -142,8 +140,6 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 out:
     if (tcp != NULL)
         free(tcp);
-    if (received != NULL)
-        free(received);
     close(sockfd);
     debug("HTTP connection %s, %d bytes received, remote path %s", (isok ? "OK" : "failed"), totalbytes, remote_path);
     return totalbytes;

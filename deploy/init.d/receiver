@@ -87,12 +87,12 @@ case "$1" in
 	;;
 
   reload|force-reload)
-	log_daemon_msg "Reloading merger" "merger"
-    if [ ! -f "$PIDFILE" ]; then
-        log_failure_msg "merger is not running"
+	log_daemon_msg "Reloading receiver" "receiver"
+    if [ ! -f "$PID_FILE" ]; then
+        log_failure_msg "receiver is not running"
         log_end_msg 1
     fi
-    kill -HUP `cat $PIDFILE`
+    kill -HUP `cat $PID_FILE`
     log_end_msg 0
 	;;
 

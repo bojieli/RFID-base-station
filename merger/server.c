@@ -18,7 +18,7 @@ static void handle_student(char* id, int action) {
     };
     int old_state = get(students, id);
     int new_state = state_table[old_state][action];
-    debug("student %s at %s, state %d => %d", id, action ? "slave" : "master", old_state, new_state);
+    debug_verbose("student %s at %s, state %d => %d", id, action ? "slave" : "master", old_state, new_state);
     set(students, id, new_state);
     clear_timeout(id);
     if (new_state != 0)
@@ -50,6 +50,8 @@ static int msg_loop(int sockfd) {
         {.fd = sockfd, .events = POLLIN} // accept connection
     };
 
+    unsigned char* buf = safe_malloc(PACKET_SIZE); // packet buf
+
     while (1) {
         IF_ERROR(poll(fds, 3, -1), "poll")
         if (fds[0].revents & POLLERR || fds[1].revents & POLLERR || fds[2].revents & POLLERR) {
@@ -78,7 +80,6 @@ static int msg_loop(int sockfd) {
         int i;
         for (i=0; i<2; i++) {
             if (fds[i].revents & POLLIN) {
-                unsigned char* buf = safe_malloc(PACKET_SIZE);
                 int readlen = recvn(fds[i].fd, buf, PACKET_SIZE);
                 if (readlen == -1) {
                     fatal("read from %s", i ? "slave" : "master");
@@ -93,7 +94,6 @@ static int msg_loop(int sockfd) {
                 // ID with first byte 0x00 is for internal testing, drop it
                 if (buf[0] != 0)
                     handle_packet(buf, i);
-                free(buf);
             }
         }
     }

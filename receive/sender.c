@@ -37,11 +37,12 @@ static bool try_connect(void)
     inet_aton(get_config("master.ip"), &server_addr.sin_addr);
     bzero(&(server_addr.sin_zero), 8);
     if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
-        fatal("error connecting master");
+        fatal("error connecting merger");
         close(sockfd);
         sockfd = -1; // mark it as inactive
         return false;
     }
+    debug("connected to merger");
     return true;
 }
 
