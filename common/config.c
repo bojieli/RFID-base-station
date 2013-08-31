@@ -18,7 +18,7 @@ char* get_config(const char* key)
         cur = cur->next;
     }
     fatal("config '%s' does not exist", key);
-    return NULL;
+    return ""; // in case atoi() is wrapped
 }
 
 // note: a value with an existing key overrides the old one
