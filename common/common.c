@@ -65,7 +65,7 @@ static void sigusr1_action(int signo) {
 }
 
 static void sigpipe_action(int signo) {
-    report_it_now("caught signal SIGPIPE, errorno %d, ignoring", signo);
+    fatal("caught signal SIGPIPE, errorno %d, ignoring", signo);
 }
 
 void init_sigactions(void)

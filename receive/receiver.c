@@ -49,5 +49,6 @@ int main(int argc, char** argv)
 
     // if sender finds error, exit
     pthread_join(tid_sender, NULL);
+    fatal("sender thread exit");
     return 0;
 }
