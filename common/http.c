@@ -90,7 +90,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 
     int sendlen = strlen(tcp);
     int sendedlen = send(sockfd, tcp, sendlen, 0);
-    if (sendedlen < strlen(tcp)) {
+    if (sendedlen < sendlen) {
         fatal("send to remote server: %d bytes sent, total %d bytes", sendedlen, sendlen);
         goto out;
     }
