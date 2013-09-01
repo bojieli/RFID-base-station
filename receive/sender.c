@@ -64,6 +64,10 @@ static bool do_send(void) {
             send_queue_len = 0;
         }
         pthread_mutex_unlock(&lock_sender);
+
+        if (sendlen > atoi(get_config("master.warn_queue_len"))) {
+            report_it_now("receiver queue too long (%d bytes, %d packets)", sendlen, sendlen / atoi(get_config("master.heartbeat_packlen")));
+        }
     }
 
     int sendedlen = send(sockfd, sendbuf, sendlen, 0);
