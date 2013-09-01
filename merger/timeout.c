@@ -46,10 +46,11 @@ static void check_timers() {
         dict timer = prev_timer->next;
         if (curr_time - timer->value >= atoi(get_config("student.timeout"))) {
             int curr_state = get(students, timer->key);
-            debug("student %s timeout, back to state 0", timer->key);
             set(students, timer->key, 0); // goto state 0
             if (curr_state == 3 || curr_state == 4) {
                 notify(timer->key, (curr_state == 4));
+            } else {
+                debug("student %s timeout, state %d => 0", timer->key, curr_state);
             }
             __remove(prev_timer); // when student goes to state 0, timer should be removed
             continue;
