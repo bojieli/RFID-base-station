@@ -1,1 +1,2 @@
-/home/boj/rfid-base-station/deploy/deploy.sh update
+#!/bin/bash
+~/rfid-base-station/deploy/deploy.sh update
