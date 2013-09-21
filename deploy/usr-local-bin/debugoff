@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo sed -i 's/debug.log_verbose = 1/debug.log_verbose = 0/g' /opt/gewuit/rfid/etc/merger.ini
+sudo sed -i 's/debug.log_verbose = 1/debug.log_verbose = 0/g' /opt/gewuit/rfid/etc/receiver.ini
+sudo service merger reload
+sudo service receiver reload

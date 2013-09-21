@@ -1,0 +1,6 @@
+#!/bin/bash
+num=$1
+if [ -z "$num" ]; then
+	num=10
+fi
+tail -n $num -f /opt/gewuit/rfid/log/merger.log

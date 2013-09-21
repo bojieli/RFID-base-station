@@ -100,7 +100,7 @@ if [ "$ACTION" == "install" ]; then
 fi
 
 # install helper scripts
-cp $CODE_BASE/deploy/helper/* /usr/local/bin/
+cp $CODE_BASE/deploy/usr-local-bin/* /usr/local/bin/
 
 # install logrotate
 # logrotate configs must be owned by root
