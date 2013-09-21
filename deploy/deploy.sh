@@ -84,6 +84,7 @@ if [ "$ACTION" == "install" ]; then
     sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $MERGER_CONF
     RECEIVER_CONF=$INSTALL_DIR/etc/receiver.ini
     sed -i "s/^master.ip = .*$/master.ip = $MASTER_IP/" $RECEIVER_CONF
+    sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $RECEIVER_CONF
 fi
 
 # install init scripts
