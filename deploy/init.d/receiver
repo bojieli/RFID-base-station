@@ -31,10 +31,10 @@ test -x $DAEMON || exit 0
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 receiver_start() {
-    if [ ! -f "/dev/spidev0.0" ]; then
+    if [ ! -e "/dev/spidev0.0" ]; then
         log_progress_msg "SPI device not found, probing..."
         gpio load spi
-        if [ ! -f "/dev/spidev0.0" ]; then
+        if [ ! -e "/dev/spidev0.0" ]; then
             log_failure_msg "Failed to enumerate SPI device"
         fi
     fi
