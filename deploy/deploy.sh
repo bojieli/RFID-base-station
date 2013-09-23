@@ -103,6 +103,9 @@ fi
 # install helper scripts
 cp $CODE_BASE/deploy/usr-local-bin/* /usr/local/bin/
 
+# enable SPI kernel module
+sed -i '/^blacklist spi-bcm2708/d' /etc/modprobe.d/raspi-blacklist.conf
+
 # install logrotate
 # logrotate configs must be owned by root
 cp $CODE_BASE/deploy/logrotate.d/* /etc/logrotate.d/
