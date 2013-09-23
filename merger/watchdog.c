@@ -24,8 +24,8 @@ static void check_lock(pthread_mutex_t *lock, const char* msg) {
     report_it_now("watchdog: cannot acquire lock '%s', errno %d", msg, flag);
 }
 
-bool receiver_alive[2];
-static bool last_receiver_alive[2];
+bool receiver_alive[2] = {false, false};
+static bool last_receiver_alive[2] = {true, true};
 
 /* This function should be invoked periodically.
  * receiver_alive[no] should be set to true when receive heartheat.
@@ -41,6 +41,7 @@ static void check_receiver(int no, const char* name) {
 void init_watchdog() {
     int relatime = 0;
     while (1) {
+        sleep(1); // minimum check interval: 1 second
         check_lock(&lock_notify_queue, "notify queue");
         check_lock(&lock_timers, "timers");
         relatime++;
@@ -48,6 +49,5 @@ void init_watchdog() {
             check_receiver(0, "master");
             check_receiver(1, "slave");
         }
-        sleep(1); // minimum check interval: 1 second
     }
 }

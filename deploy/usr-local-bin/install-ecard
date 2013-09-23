@@ -9,11 +9,11 @@ if [ "$target" == "master" ]; then
     read ip
     echo -n "School token: "
     read token
-    sudo ./deploy.sh master $ip $token
+    sudo ~/rfid-base-station/deploy/deploy.sh master $ip $token
 elif [ "$target" == "slave" ]; then
     echo -n "IP address of master: "
     read ip
-    sudo ./deploy.sh slave $ip
+    sudo ~/rfid-base-station/deploy/deploy.sh slave $ip
 else
     echo 'Please input "master" or "slave"'
 fi

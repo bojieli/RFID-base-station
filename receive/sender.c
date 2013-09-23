@@ -49,7 +49,7 @@ static bool try_connect(void)
 static bool do_send(void) {
     static bool lastok = true;
     static unsigned char *sendbuf;
-    static unsigned int sendlen;
+    static int sendlen;
 
     if (lastok) {
         pthread_mutex_lock(&lock_sender);
