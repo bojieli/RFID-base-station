@@ -76,6 +76,7 @@ void init_sigactions(void);
 void init_params(int argc, char** argv);
 bool report_it_now(char* format, ...);
 int cloud_send(const char* remote_path, char* buf, char** recvbuf);
+void cron_logflush(void);
 
 // dict.c
 typedef struct dict_item {

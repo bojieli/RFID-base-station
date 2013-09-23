@@ -142,3 +142,11 @@ int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
     return flag;
 }
 
+// flush logfile every one second
+void cron_logflush(void) {
+    while (true) {
+        sleep(1);
+        if (logfile)
+            fflush(logfile);
+    }
+}

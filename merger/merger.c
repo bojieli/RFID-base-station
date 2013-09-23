@@ -37,11 +37,12 @@ int main(int argc, char** argv)
     students = new_dict();
     timers = new_dict();
 
-    pthread_t tid_server, tid_timeout, tid_sender, tid_watchdog;
+    pthread_t tid_server, tid_timeout, tid_sender, tid_watchdog, tid_logflusher;
     pthread_create(&tid_server,   NULL, (void * (*)(void *))&init_server,   NULL);
     pthread_create(&tid_timeout,  NULL, (void * (*)(void *))&init_timeout,  NULL);
     pthread_create(&tid_sender,   NULL, (void * (*)(void *))&init_sender,   NULL);
     pthread_create(&tid_watchdog, NULL, (void * (*)(void *))&init_watchdog, NULL);
+    pthread_create(&tid_logflusher, NULL, (void * (*)(void *))&cron_logflush, NULL);
 
     pthread_join(tid_server, NULL);
     debug("Program terminated");
