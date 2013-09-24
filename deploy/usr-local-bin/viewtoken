@@ -1,0 +1,2 @@
+#!/bin/bash
+cat /opt/gewuit/rfid/etc/merger.ini | grep 'cloud.access_token' | awk 'BEGIN{FS="="}{print $2}' | tr -d " "
