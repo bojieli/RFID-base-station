@@ -1,2 +1,2 @@
 #!/bin/bash
-~/rfid-base-station/deploy/deploy.sh update
+sudo /home/pi/rfid-base-station/deploy/deploy.sh update
