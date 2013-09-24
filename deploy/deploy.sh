@@ -110,7 +110,12 @@ sed -i '/^blacklist spi-bcm2708/d' /etc/modprobe.d/raspi-blacklist.conf
 # logrotate configs must be owned by root
 cp $CODE_BASE/deploy/logrotate.hourly.conf /etc/
 chown root /etc/logrotate.hourly.conf
-cp $CODE_BASE/deploy/cron.hourly/logrotate /etc/cron.hourly/
+tmpfile="/tmp/root_crontab"
+crontab -l >$tmpfile
+echo "0 * * * *  /usr/sbin/logrotate /etc/logrotate.hourly.conf" >>$tmpfile
+echo "30 * * * *  /usr/local/bin/upload-logs" >>$tmpfile
+crontab $tmpfile
+rm $tmpfile
 
 # set hostname
 if [ "$ACTION" == "install" ]; then

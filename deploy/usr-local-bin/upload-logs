@@ -1,0 +1,2 @@
+#!/bin/bash
+rsync -a --remove-source-files --exclude merger.log --exclude receiver.log /opt/gewuit/rfid/log/ pi@shi6.com:ecard-log/`viewtoken`/
