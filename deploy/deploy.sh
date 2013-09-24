@@ -111,7 +111,6 @@ sed -i '/^blacklist spi-bcm2708/d' /etc/modprobe.d/raspi-blacklist.conf
 cp $CODE_BASE/deploy/logrotate.hourly.conf /etc/
 chown root /etc/logrotate.hourly.conf
 cp $CODE_BASE/deploy/cron.hourly/logrotate /etc/cron.hourly/
-cp $CODE_BASE/deploy/logrotate.d/* /etc/logrotate.d/
 
 # set hostname
 if [ "$ACTION" == "install" ]; then
