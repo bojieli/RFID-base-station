@@ -1,0 +1,12 @@
+#!/bin/bash
+function check_service() {
+    /etc/init.d/$1 status
+    if [ $? -ne 0 ]; then
+        /etc/init.d/$1 start
+    fi
+}
+
+if [ `hostname` == "master" ]; then
+    check_service merger
+fi
+check_service receiver
