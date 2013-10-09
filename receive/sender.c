@@ -54,7 +54,7 @@ static bool do_send(void) {
     if (lastok) {
         pthread_mutex_lock(&lock_sender);
         if (send_queue_len == 0) { // send heartbeat with all bytes zero
-            sendlen = atoi(get_config("master.heartbeat_packlen"));
+            sendlen = atoi(get_config("nrf.RX_PLOAD_WIDTH"));
             sendbuf = safe_malloc(sendlen);
             bzero(sendbuf, sendlen);
         } else { // send normal data
