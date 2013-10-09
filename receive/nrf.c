@@ -122,7 +122,7 @@ begin:
     SPI_write_reg(WRITE_REG + CONFIG, NRFconf("CONFIG_intr_mask")); // 屏蔽所有中断
     SPI_write_reg(WRITE_REG + STATUS, NRFconf("CONFIG_clear_intr")); //清中断标志位
 	SPI_Write_Buf(WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); // 写本地地址
-	SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, TX_ADR_WIDTH); // 装载通道0的地址，用于ACK
+	SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); // 装载通道0的地址，用于ACK
 //*********************************配置NRF24L01**************************************
 	SPI_write_reg(WRITE_REG + EN_AA, NRFconf("EN_AA")); //ACK自动应答0通道不允许
 	SPI_write_reg(WRITE_REG + EN_RXADDR, NRFconf("EN_RXADDR")); // 允许接收地址只有频道0
@@ -142,7 +142,8 @@ void print_configs()
 {
     CE(0);
     SPI_write_reg(WRITE_REG + STATUS, NRFconf("CONFIG_clear_intr")); //清中断标志位
-#define PCONF(x) debug("%15s   0x%02x", #x, SPI_Read(x))
+#define __PCONF(x,data) debug("%15s   0x%x", #x, data)
+#define PCONF(x) __PCONF(#x, SPI_Read(x))
     PCONF(STATUS);
     PCONF(EN_AA);
     PCONF(EN_RXADDR);
@@ -151,6 +152,13 @@ void print_configs()
     PCONF(RX_PW_P0);
     PCONF(RF_SETUP);
     PCONF(CONFIG);
+
+    __PCONF(TX_ADR_WIDTH, TX_ADR_WIDTH);
+    __PCONF(RX_ADR_WIDTH, RX_ADR_WIDTH);
+    __PCONF(RX_ADDRESS_0, RX_ADDRESS[0]);
+    __PCONF(RX_ADDRESS_1, RX_ADDRESS[1]);
+    __PCONF(RX_ADDRESS_2, RX_ADDRESS[2]);
+#undef __PCONF
 #undef PCONF
     fflush(stdout);
     CE(1);
