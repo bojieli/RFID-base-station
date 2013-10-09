@@ -26,7 +26,7 @@ static void handle_student(char* id, int action) {
 }
 
 static void handle_packet(unsigned char* pack, int action) {
-    if (!check_packet(pack)) {
+    if (atoi(get_config("nrf.checksum_enable")) && !check_packet(pack)) {
         debug("Received invalid packet: ");
         print_buf(pack, PACKET_SIZE);
         return;
@@ -92,7 +92,7 @@ static int msg_loop(int sockfd) {
                 }
                 receiver_alive[i] = true;
                 // ID with first byte 0x00 is for internal testing, drop it
-                if (buf[0] != 0)
+                if (atoi(get_config("student.first_byte_zero_enable")) || buf[0] != 0)
                     handle_packet(buf, i);
             }
         }
