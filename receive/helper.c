@@ -37,7 +37,7 @@ static void load_hex_config(const char* name, int* len, uchar** buf) {
     return;
 error:
     *len = 0;
-    *buf = "";
+    *buf = NULL;
 }
 
 static void load_global_configs() {
