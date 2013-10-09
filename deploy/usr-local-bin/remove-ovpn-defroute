@@ -1,0 +1,7 @@
+#!/bin/sh
+(
+    sleep 2 # wait for routing table to be flushed
+    ip route del 0.0.0.0/1 dev tun0
+    ip route del 128.0.0.0/1 dev tun0
+) &
+exit 0
