@@ -91,9 +91,20 @@ static int msg_loop(int sockfd) {
                     continue;
                 }
                 receiver_alive[i] = true;
-                // ID with first byte 0x00 is for internal testing, drop it
-                if (atoi(get_config("student.first_byte_zero_enable")) || buf[0] != 0)
+
+                if (atoi(get_config("student.first_byte_zero_enable"))) {
+                    int j;
+                    for (j=0; j<PACKET_SIZE; j++)
+                        if (buf[j] != 0) {
+                            handle_packet(buf, i);
+                            break;
+                        }
+                    // all bytes zero, it's heartbeat
+                }
+                else if (buf[0] != 0) {
+                    // ID with first byte 0x00 is for internal testing, drop it
                     handle_packet(buf, i);
+                }
             }
         }
     }
