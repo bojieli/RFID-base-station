@@ -28,7 +28,6 @@ static void load_hex_config(const char* name, int* len, uchar** buf) {
         if (*len*2 != origlen) // odd number of hex
             goto error;
         *buf = (uchar*)malloc(*len);
-        str += 2;
         uchar *cur = *buf;
         while (*str != '\0') {
             *cur = hex2int(*str++) << 4;
