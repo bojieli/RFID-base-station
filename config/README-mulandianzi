@@ -1,0 +1,26 @@
+木兰电子的射频卡需要在默认配置基础上做如下修改：
+
+receiver.ini:
+
+[nrf]
+nrf.channel = 2
+nrf.EN_AA = 0x00
+nrf.EN_RXADDR = 0x01
+nrf.SETUP_RETR = 0x00
+nrf.RX_PLOAD_WIDTH = 5
+nrf.RF_SETUP = 0x07
+nrf.CONFIG = 0x0f
+nrf.CONFIG_intr_mask = 0x7f
+nrf.CONFIG_clear_intr = 0x70
+nrf.CONFIG_send = 0x0e
+nrf.TX_ADDRESS = 0xe79ee7
+nrf.RX_ADDRESS = 0xe79ee7
+
+
+merger.ini:
+
+[student]
+student.packet_size = 5
+student.timeout = 30
+student.checksum_enable = 0
+student.first_byte_zero_enable = 1
