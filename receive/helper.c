@@ -22,16 +22,16 @@ int TX_ADR_WIDTH, RX_ADR_WIDTH;
 
 uchar *TX_ADDRESS, *RX_ADDRESS;
 
-static void load_hex_config(const char* name, int* len, char** buf) {
+static void load_hex_config(const char* name, int* len, uchar** buf) {
     char* str = get_config(name);
     if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
         goto error;
     } else {
         int origlen = strlen(str);
         *len = (origlen-2)/2;
-        if (len*2 != origlen-2) // odd number of hex
+        if (*len*2 != origlen-2) // odd number of hex
             goto error;
-        *buf = (char*)malloc(*len);
+        *buf = (uchar*)malloc(*len);
         str += 2;
         char *cur = *buf;
         while (*str != '\0') {

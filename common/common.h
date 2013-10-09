@@ -71,6 +71,7 @@ extern char *logfile_saved;
 // common.c
 char* print_time(void);
 char tohexchar(int n);
+int hex2int(char c);
 void print_buf(uchar* buf, int len);
 void init_sigactions(void);
 void init_params(int argc, char** argv);

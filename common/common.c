@@ -24,6 +24,16 @@ char tohexchar(int n) {
         return 'a' + n - 10;
 }
 
+int hex2int(char c) {
+    if (c>='a' && c<='f')
+        return c-'a'+10;
+    else if (c>='A' && c<='F')
+        return c-'A'+10;
+    else if (c>='0' && c<='9')
+        return c-'0';
+    return -1;
+}
+
 void print_buf(uchar* buf, int len)
 {
     char *str = safe_malloc(len * 3);
