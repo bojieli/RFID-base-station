@@ -22,9 +22,10 @@ static void load_hex_config(const char* name, int* len, uchar** buf) {
     if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
         goto error;
     } else {
+        str += 2;
         int origlen = strlen(str);
-        *len = (origlen-2)/2;
-        if (*len*2 != origlen-2) // odd number of hex
+        *len = origlen/2;
+        if (*len*2 != origlen) // odd number of hex
             goto error;
         *buf = (uchar*)malloc(*len);
         str += 2;
