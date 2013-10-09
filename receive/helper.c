@@ -32,7 +32,7 @@ static void load_hex_config(const char* name, int* len, uchar** buf) {
         uchar *cur = *buf;
         while (*str != '\0') {
             *cur = hex2int(*str++) << 4;
-            *cur += hex2int(*str++);
+            *cur++ += hex2int(*str++);
         }
     }
     return;
