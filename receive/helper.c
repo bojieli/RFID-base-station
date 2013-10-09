@@ -17,12 +17,43 @@ static void blink_led()
     }
 }
 
+int TX_PLOAD_WIDTH, RX_PLOAD_WIDTH;
+int TX_ADR_WIDTH, RX_ADR_WIDTH;
+
+uchar *TX_ADDRESS, *RX_ADDRESS;
+
+static void load_hex_config(const char* name, int* len, char** buf) {
+    char* str = get_config(name);
+    if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
+        goto error;
+    } else {
+        int origlen = strlen(str);
+        *len = (origlen-2)/2;
+        if (len*2 != origlen-2) // odd number of hex
+            goto error;
+        *buf = (char*)malloc(*len);
+        str += 2;
+        char *cur = *buf;
+        while (*str != '\0') {
+            *cur = hex2int(*str++) << 4;
+            *cur += hex2int(*str++);
+        }
+    }
+    return;
+error:
+    *len = 0;
+    *buf = "";
+}
+
 static void load_global_configs() {
     IRQ_PIN = atoi(get_config("pin.IRQ"));
     CSN_PIN = atoi(get_config("pin.CSN"));
     CE_PIN  = atoi(get_config("pin.CE"));
     LED_PIN = atoi(get_config("pin.LED"));
     LED2_PIN = atoi(get_config("pin.LED2"));
+
+    load_hex_config("nrf.TX_ADDRESS", &TX_ADR_WIDTH, &TX_ADDRESS);
+    load_hex_config("nrf.RX_ADDRESS", &RX_ADR_WIDTH, &RX_ADDRESS);
 }
 
 static void common_init(void)

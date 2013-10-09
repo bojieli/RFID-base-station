@@ -7,9 +7,9 @@
 
 extern int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 
-#define TX_ADR_WIDTH   5  
+extern int TX_ADR_WIDTH;
 extern int TX_PLOAD_WIDTH;
-#define RX_ADR_WIDTH   5
+extern int RX_ADR_WIDTH;
 extern int RX_PLOAD_WIDTH;
 #define BUF_SIZE RX_PLOAD_WIDTH
 

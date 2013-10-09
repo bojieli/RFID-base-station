@@ -1,10 +1,5 @@
 #include "nrf.h"
 
-int TX_PLOAD_WIDTH, RX_PLOAD_WIDTH;
-
-uchar TX_ADDRESS[TX_ADR_WIDTH] = {0xff,0xff,0xff,0xff,0xff};//本地地址
-uchar RX_ADDRESS[TX_ADR_WIDTH] = {0xff,0xff,0xff,0xff,0xff};//本地地址
-
 static uchar station_R, station_T;
 
 #define RX_DR	sta&(1<<6)
