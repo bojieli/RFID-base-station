@@ -130,7 +130,9 @@ void init_NRF24L01(uchar station)
 begin:
     SPI_write_reg(WRITE_REG + CONFIG, NRFconf("CONFIG_intr_mask")); // 屏蔽所有中断
     SPI_write_reg(WRITE_REG + STATUS, NRFconf("CONFIG_clear_intr")); //清中断标志位
-	SPI_Write_Buf_safe(WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); // 写本地地址
+    SPI_write_reg(WRITE_REG + SETUP_AW, TX_ADR_WIDTH - 2); // 0x01 for 3, 0x02 for 4, 0x03 for 5
+    SPI_Write_Buf_safe(WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); // 写本地地址
+    SPI_write_reg(WRITE_REG + SETUP_AW, RX_ADR_WIDTH - 2);
 	SPI_Write_Buf_safe(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); // 装载通道0的地址，用于ACK
 //*********************************配置NRF24L01**************************************
 	SPI_write_reg(WRITE_REG + EN_AA, NRFconf("EN_AA")); //ACK自动应答0通道不允许
@@ -151,9 +153,10 @@ void print_configs()
 {
     CE(0);
     SPI_write_reg(WRITE_REG + STATUS, NRFconf("CONFIG_clear_intr")); //清中断标志位
-#define __PCONF(x,data) debug("%15s   0x%x", #x, data)
+#define __PCONF(x,data) debug("%15s   0x%02x", #x, data)
 #define PCONF(x) __PCONF(#x, SPI_Read(x))
     PCONF(STATUS);
+    PCONF(SETUP_AW);
     PCONF(EN_AA);
     PCONF(EN_RXADDR);
     PCONF(SETUP_RETR);
