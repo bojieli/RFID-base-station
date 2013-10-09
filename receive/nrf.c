@@ -2,6 +2,11 @@
 
 static uchar station_R, station_T;
 
+int TX_PLOAD_WIDTH, RX_PLOAD_WIDTH;
+int TX_ADR_WIDTH, RX_ADR_WIDTH;
+
+uchar *TX_ADDRESS, *RX_ADDRESS;
+
 #define RX_DR	sta&(1<<6)
 #define TX_DS	sta&(1<<5)
 #define MAX_RT 	sta&(1<<4)

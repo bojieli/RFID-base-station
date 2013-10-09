@@ -8,7 +8,7 @@
 extern int IRQ_PIN, CSN_PIN, CE_PIN, LED_PIN, LED2_PIN;
 
 extern int TX_ADR_WIDTH, RX_ADR_WIDTH;
-extern uchar* TX_ADDRESS, RX_ADDRESS;
+extern uchar *TX_ADDRESS, *RX_ADDRESS;
 
 extern int TX_PLOAD_WIDTH, RX_PLOAD_WIDTH;
 #define BUF_SIZE RX_PLOAD_WIDTH

@@ -17,11 +17,6 @@ static void blink_led()
     }
 }
 
-int TX_PLOAD_WIDTH, RX_PLOAD_WIDTH;
-int TX_ADR_WIDTH, RX_ADR_WIDTH;
-
-uchar *TX_ADDRESS, *RX_ADDRESS;
-
 static void load_hex_config(const char* name, int* len, uchar** buf) {
     char* str = get_config(name);
     if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
@@ -33,7 +28,7 @@ static void load_hex_config(const char* name, int* len, uchar** buf) {
             goto error;
         *buf = (uchar*)malloc(*len);
         str += 2;
-        char *cur = *buf;
+        uchar *cur = *buf;
         while (*str != '\0') {
             *cur = hex2int(*str++) << 4;
             *cur += hex2int(*str++);
