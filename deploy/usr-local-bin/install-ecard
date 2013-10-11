@@ -2,6 +2,13 @@
 # interactive deploy script
 
 echo "===== Install RFID base station ====="
+
+echo -n "Input vendor (e.g. default, mulandianzi): "
+read vendor
+if [ ! -z "$vendor" ] && [ "$vendor" != "default" ] && [ "$vendor" != "mulandianzi" ]; then
+    echo 'Only default and mulandianzi is supported'
+fi
+
 echo -n "Is it [master] or [slave]? "
 read target
 if [ "$target" == "master" ]; then
@@ -9,11 +16,13 @@ if [ "$target" == "master" ]; then
     read ip
     echo -n "School token: "
     read token
-    sudo /home/pi/rfid-base-station/deploy/deploy.sh master $ip $token
+    sudo /home/pi/rfid-base-station/deploy/deploy.sh master $ip $token $vendor
 elif [ "$target" == "slave" ]; then
     echo -n "IP address of master: "
     read ip
-    sudo /home/pi/rfid-base-station/deploy/deploy.sh slave $ip
+    echo -n "School token: "
+    read token
+    sudo /home/pi/rfid-base-station/deploy/deploy.sh slave $ip $token $vendor
 else
     echo 'Please input "master" or "slave"'
 fi

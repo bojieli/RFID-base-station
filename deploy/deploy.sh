@@ -12,7 +12,7 @@ isip()
 }
 
 if [ -z "$1" ]; then
-    echo "Usage: ./deploy.sh [ master <ip-of-slave> <access-token> | slave <ip-of-master> <access-token> | update ]"
+    echo "Usage: ./deploy.sh [ master <ip-of-slave> <access-token> | slave <ip-of-master> <access-token> | update ] [<vendor>]"
     exit 1
 elif [ "$1" == "update" ]; then
     ACTION=update
@@ -21,6 +21,7 @@ elif [ "$1" == "update" ]; then
     else
         TARGET=slave
     fi
+    VENDOR=${2:-default}
 elif [ "$1" == "master" ]; then
     if ! isip "$2"; then
         echo "slave IP is invalid"
@@ -35,6 +36,7 @@ elif [ "$1" == "master" ]; then
     MASTER_IP="127.0.0.1"
     SLAVE_IP=$2
     ACCESS_TOKEN=$3
+    VENDOR=${4:-default}
 elif [ "$1" == "slave" ]; then
     if ! isip "$2"; then
         echo "master IP is invalid"
@@ -49,6 +51,7 @@ elif [ "$1" == "slave" ]; then
     MASTER_IP=$2
     SLAVE_IP="127.0.0.1"
     ACCESS_TOKEN=$3
+    VENDOR=${4:-default}
 else
     echo "Please specify master, slave or update as first parameter"
     exit 1
@@ -78,7 +81,11 @@ cp $CODE_BASE/build/* $INSTALL_DIR/bin/
 # generate config files
 if [ "$ACTION" == "install" ]; then
     # preserve file owner for easy editing of configs
-    cp -a $CODE_BASE/config/* $INSTALL_DIR/etc/
+    if [ "$VENDOR" != "default" ]; then
+        cp -a $CODE_BASE/config/$VENDOR/* $INSTALL_DIR/etc/
+    else
+        cp -a $CODE_BASE/config/* $INSTALL_DIR/etc/
+    fi
     MERGER_CONF=$INSTALL_DIR/etc/merger.ini
     sed -i "s/^listen.local_ip = .*$/listen.local_ip = $MASTER_IP/" $MERGER_CONF
     sed -i "s/^cloud.access_token = .*$/cloud.access_token = $ACCESS_TOKEN/" $MERGER_CONF
