@@ -62,6 +62,7 @@ if [ "$ACTION" == "install" ]; then
     echo "master ip: $MASTER_IP"
     echo "slave ip: $SLAVE_IP"
     echo "access token: $ACCESS_TOKEN"
+    echo "vendor: $VENDOR"
 fi
 
 if [ `whoami` != 'root' ]; then
