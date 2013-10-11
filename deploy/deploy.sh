@@ -126,6 +126,7 @@ sed -i '/\/usr\/local\/bin\/ecard-watchdog/d' $tmpfile
 echo "0 * * * *  /usr/sbin/logrotate /etc/logrotate.hourly.conf" >>$tmpfile
 echo "30 * * * *  /usr/local/bin/upload-logs" >>$tmpfile
 echo "* * * * *  /usr/local/bin/ecard-watchdog" >>$tmpfile
+echo "* * * * *  /usr/local/bin/report-local-ip" >>$tmpfile
 crontab $tmpfile
 rm $tmpfile
 

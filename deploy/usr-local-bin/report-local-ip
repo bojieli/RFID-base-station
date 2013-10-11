@@ -1,0 +1,8 @@
+#!/bin/bash
+
+function devip() {
+    ip addr show dev $1 | awk '{if($1=="inet") {print $2; exit}}'
+}
+token=$(cat /opt/gewuit/rfid/etc/merger.ini | awk 'BEGIN{FS="="}{ if(match($1,"access_token")) {print $2; exit} }' | tr -d ' ')
+
+curl -d "token=$token&eth0=$(devip eth0)&tun0=$(devip tun0)" http://gewu.me/report-local-ip >/dev/null 2>&1
