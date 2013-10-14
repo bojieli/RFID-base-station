@@ -22,6 +22,25 @@ void add_to_queue(unsigned char* buf, size_t len) {
     pthread_mutex_unlock(&lock_sender);
 }
 
+static char* get_master_ip() {
+    static char* ip = NULL;
+    static char* localip = "127.0.0.1";
+    static int last_update = 0;
+    
+    int curr = (int)time(NULL);
+    if (curr - last_update > atoi(get_config("master.dynamic_ip_timeout"))) {
+        char* recvbuf = NULL;
+        if (cloud_send(get_config("paths.queryip"), "master", recvbuf) == -1) { //failed
+            if (recvbuf != NULL)
+                free(recvbuf);
+        } else { //success
+            ip = recvbuf;
+        }
+        last_update = curr;
+    }
+    return ip ? ip : localip;
+}
+
 static bool try_connect(void)
 {
     struct sockaddr_in server_addr;
@@ -34,7 +53,7 @@ static bool try_connect(void)
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(atoi(get_config("master.port")));
-    inet_aton(get_config("master.ip"), &server_addr.sin_addr);
+    inet_aton(get_master_ip(), &server_addr.sin_addr);
     bzero(&(server_addr.sin_zero), 8);
     if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
         fatal("error connecting merger");
