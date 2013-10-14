@@ -152,10 +152,10 @@ int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
     return flag;
 }
 
-// flush logfile every one second
+// flush logfile every 100ms
 void cron_logflush(void) {
     while (true) {
-        sleep(1);
+        usleep(100000);
         if (logfile)
             fflush(logfile);
     }
