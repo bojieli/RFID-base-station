@@ -78,7 +78,7 @@ static int msg_loop(int sockfd) {
             socklen_t sin_size = sizeof(client_addr);
             int newfd;
             IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
-            char* client_addr_str = inet_ntoa(client_addr.sin_addr);
+            char* client_addr_str = strdup(inet_ntoa(client_addr.sin_addr));
             if (0 == strcmp(client_addr_str, get_local_ip()) ||
                 0 == strcmp(client_addr_str, "127.0.0.1")) {
                 fds[0].fd = newfd;
@@ -87,6 +87,7 @@ static int msg_loop(int sockfd) {
                 fds[1].fd = newfd;
                 report_it_now("slave (%s) connected", client_addr_str);
             }
+            free(client_addr_str);
         }
 
         // read from established connection
