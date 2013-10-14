@@ -3,8 +3,17 @@
 function devip() {
     ip addr show dev $1 | awk '{if($1=="inet") {print $2; exit}}' | awk 'BEGIN{FS="/"}{print $1}'
 }
+
+function report_once() {
 token=$(cat /opt/gewuit/rfid/etc/merger.ini | awk 'BEGIN{FS="="}{ if(match($1,"access_token")) {print $2; exit} }' | tr -d ' ')
 
 data="{\"hostname\": \"$(hostname)\", \"eth0\": \"$(devip eth0)\", \"tun0\": \"$(devip tun0)\"}"
 encoded=$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$data")
 curl -d "token=$token&data=$data" http://gewu.me/ecard/reportip >/dev/null 2>&1
+}
+
+# simulate report per 15 seconds
+for i in {1..4}; do
+    report_once
+    sleep 15
+done
