@@ -26,7 +26,7 @@ static void handle_student(char* id, int action) {
 }
 
 static void handle_packet(unsigned char* pack, int action) {
-    if (atoi(get_config("nrf.checksum_enable")) && !check_packet(pack)) {
+    if (atoi(get_config("student.checksum_enable")) && !check_packet(pack)) {
         debug("Received invalid packet: ");
         print_buf(pack, PACKET_SIZE);
         return;
