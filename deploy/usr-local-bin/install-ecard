@@ -12,17 +12,13 @@ fi
 echo -n "Is it [master] or [slave]? "
 read target
 if [ "$target" == "master" ]; then
-    echo -n "IP address of slave: "
-    read ip
     echo -n "School token: "
     read token
-    sudo /home/pi/rfid-base-station/deploy/deploy.sh master $ip $token $vendor
+    sudo /home/pi/rfid-base-station/deploy/deploy.sh master $token $vendor
 elif [ "$target" == "slave" ]; then
-    echo -n "IP address of master: "
-    read ip
     echo -n "School token: "
     read token
-    sudo /home/pi/rfid-base-station/deploy/deploy.sh slave $ip $token $vendor
+    sudo /home/pi/rfid-base-station/deploy/deploy.sh slave $token $vendor
 else
     echo 'Please input "master" or "slave"'
 fi
