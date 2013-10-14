@@ -43,6 +43,19 @@ static void handle_packet(unsigned char* pack, int action) {
     free(id);
 }
 
+static char* get_local_ip() {
+    int fd;
+    struct ifreq ifr;
+   
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+    ioctl(fd, SIOCGIFADDR, &ifr);
+    close(fd);
+   
+    return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+}
+
 static int msg_loop(int sockfd) {
     struct pollfd fds[3] = {
         {.fd = -1, .events = POLLIN}, // master 
@@ -66,7 +79,7 @@ static int msg_loop(int sockfd) {
             int newfd;
             IF_ERROR((newfd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)), "accept")
             char* client_addr_str = inet_ntoa(client_addr.sin_addr);
-            if (0 == strcmp(client_addr_str, get_config("listen.local_ip")) ||
+            if (0 == strcmp(client_addr_str, get_local_ip()) ||
                 0 == strcmp(client_addr_str, "127.0.0.1")) {
                 fds[0].fd = newfd;
                 report_it_now("master (%s) connected", client_addr_str);
