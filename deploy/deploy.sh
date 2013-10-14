@@ -120,6 +120,7 @@ if [ "$ACTION" == "install" ]; then
     hostname $TARGET
     sed -i '/^127\.0\.0\.1.*/d' /etc/hosts
     echo "127.0.0.1 localhost" >> /etc/hosts
+    echo "127.0.0.1 $TARGET" >> /etc/hosts
 fi
 
 # start services
