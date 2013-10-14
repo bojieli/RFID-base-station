@@ -107,6 +107,7 @@ crontab -l >$tmpfile
 sed -i '/\/usr\/sbin\/logrotate \/etc\/logrotate.hourly.conf/d' $tmpfile
 sed -i '/\/usr\/local\/bin\/upload-logs/d' $tmpfile
 sed -i '/\/usr\/local\/bin\/ecard-watchdog/d' $tmpfile
+sed -i '/\/usr\/local\/bin\/report-local-ip/d' $tmpfile
 echo "0 * * * *  /usr/sbin/logrotate /etc/logrotate.hourly.conf" >>$tmpfile
 echo "30 * * * *  /usr/local/bin/upload-logs" >>$tmpfile
 echo "* * * * *  /usr/local/bin/ecard-watchdog" >>$tmpfile
