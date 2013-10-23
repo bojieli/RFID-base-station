@@ -3,6 +3,24 @@
 
 #include "common.h"
 
+#define HEAD_SAMPLE_LEN 5 // should be odd to break tie
+#define TAIL_SAMPLE_LEN 5
+#define HEAD_COUNTER_SIZE 4 // assert: (1<<HEAD_COUNT_SIZE) > HEAD_SAMPLE_LEN
+#define TAIL_COUNTER_SIZE 4
+
+// student state
+typedef struct {
+    unsigned int head_master_count : HEAD_COUNTER_SIZE;
+    unsigned int head_slave_count : HEAD_COUNTER_SIZE;
+    unsigned int tail : TAIL_SAMPLE_LEN;
+    unsigned int tail_count : TAIL_COUNTER_SIZE;
+} student_state;
+
+typedef union {
+    student_state s;
+    int i;
+} state2int;
+
 // notify queue: timeout enqueue, sender dequeue
 extern pthread_mutex_t lock_notify_queue;
 // timers: server and timeout read and write

@@ -8,21 +8,29 @@ static bool check_packet(unsigned char* pack) {
     return (checksum == 0);
 }
 
-static void handle_student(char* id, int action) {
-    const int state_table[][2] = {
-        {1, 2},
-        {1, 3},
-        {4, 2},
-        {1, 3},
-        {4, 2},
-    };
-    int old_state = get(students, id);
-    int new_state = state_table[old_state][action];
-    debug_verbose("student %s at %s, state %d => %d", id, action ? "slave" : "master", old_state, new_state);
-    set(students, id, new_state);
-    clear_timeout(id);
-    if (new_state != 0)
-        set_timeout(id);
+static void handle_student(char* id, bool action) {
+    state2int converter;
+    converter.i = get(students, id);
+    student_state state = converter.s;
+
+    if (state.tail_count) { // rotate tail
+        state.tail = ((state.tail << 1) + action) & ((1<<TAIL_SAMPLE_LEN)-1);
+        if (state.tail_count < TAIL_SAMPLE_LEN)
+            ++state.tail_count;
+    }
+    else if (state.head_master_count + state.head_slave_count >= HEAD_SAMPLE_LEN) { // first action after head
+        state.tail_count = 1;
+        state.tail = action;
+    }
+    else { // in head
+        action ? ++state.head_slave_count : ++state.head_master_count;
+    }
+
+    converter.s = state;
+    set(students, id, converter.i);
+    set_timeout(id);
+
+    debug_verbose("student %s at %s head_master_count %d head_slave_count %d tail %x tail_count %d", id, action ? "slave" : "master", state.head_master_count, state.head_slave_count, state.tail, state.tail_count);
 }
 
 static void handle_packet(unsigned char* pack, int action) {

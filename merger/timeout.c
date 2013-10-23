@@ -45,15 +45,36 @@ static void check_timers() {
     while (prev_timer->next != NULL) {
         dict timer = prev_timer->next;
         if (curr_time - timer->value >= atoi(get_config("student.timeout"))) {
-            int curr_state = get(students, timer->key);
+            state2int converter;
+            converter.i = get(students, timer->key);
+            student_state state = converter.s;
+
             set(students, timer->key, 0); // goto state 0
-            if (curr_state == 3 || curr_state == 4) {
-                notify(timer->key, (curr_state == 4));
-            } else {
-                debug("student %s timeout, state %d => 0", timer->key, curr_state);
-            }
             __remove(prev_timer); // when student goes to state 0, timer should be removed
-            continue;
+
+            if (state.tail_count == TAIL_SAMPLE_LEN) {
+                bool head_isslave = (state.head_slave_count > state.head_master_count);
+                unsigned int tail = state.tail;
+                unsigned int tail_slave_count = 0;
+                int i;
+                for (i=0; i<TAIL_SAMPLE_LEN; i++) {
+                    tail_slave_count += tail & 1;
+                    tail >>= 1;
+                }
+                bool tail_isslave = (tail_slave_count*2 > TAIL_SAMPLE_LEN);
+                if (head_isslave != tail_isslave) {
+                    // second param:
+                    // 1 is IN (slave => master)
+                    // 0 is OUT (master => slave)
+                    notify(timer->key, head_isslave);
+                }
+            }
+            else if (state.tail_count > TAIL_SAMPLE_LEN) {
+                report_it_now("assertion failed: state.tail_count (%d) <= TAIL_SAMPLE_LEN (%d)", state.tail_count, TAIL_SAMPLE_LEN);
+            }
+            // otherwise sequence too short
+
+            debug("student %s timeout head_master_count %d head_slave_count %d tail %x tail_count %d", timer->key, state.head_master_count, state.head_slave_count, state.tail, state.tail_count);
         }
         prev_timer = timer;
     }
