@@ -13,16 +13,10 @@ static void handle_student(char* id, bool action) {
     converter.i = get(students, id);
     student_state state = converter.s;
 
-    if (state.tail_count) { // rotate tail
-        state.tail = ((state.tail << 1) + action) & ((1<<TAIL_SAMPLE_LEN)-1);
-        if (state.tail_count < TAIL_SAMPLE_LEN)
-            ++state.tail_count;
-    }
-    else if (state.head_master_count + state.head_slave_count >= HEAD_SAMPLE_LEN) { // first action after head
-        state.tail_count = 1;
-        state.tail = action;
-    }
-    else { // in head
+    // rotate tail
+    state.tail = ((state.tail << 1) + action) & ((1<<HEAD_SAMPLE_LEN)-1);
+    // if still in head, update counter
+    if (state.head_master_count + state.head_slave_count < HEAD_SAMPLE_LEN) {
         action ? ++state.head_slave_count : ++state.head_master_count;
     }
 
@@ -30,7 +24,7 @@ static void handle_student(char* id, bool action) {
     set(students, id, converter.i);
     set_timeout(id);
 
-    debug_verbose("student %s at %s head_master_count %d head_slave_count %d tail %x tail_count %d", id, action ? "slave" : "master", state.head_master_count, state.head_slave_count, state.tail, state.tail_count);
+    debug_verbose("student %s at %s head_master_count %d head_slave_count %d head_count %d tail %x", id, action ? "slave" : "master", state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
 }
 
 static void handle_packet(unsigned char* pack, int action) {

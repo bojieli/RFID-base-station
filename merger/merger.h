@@ -3,17 +3,14 @@
 
 #include "common.h"
 
-#define HEAD_SAMPLE_LEN 5 // should be odd to break tie
-#define TAIL_SAMPLE_LEN 5
-#define HEAD_COUNTER_SIZE 4 // assert: (1<<HEAD_COUNT_SIZE) > HEAD_SAMPLE_LEN
-#define TAIL_COUNTER_SIZE 4
-
 // student state
+#define HEAD_SAMPLE_LEN 5   // should be odd to break tie
+#define HEAD_COUNTER_SIZE 4 // assert: (1<<HEAD_COUNT_SIZE) > HEAD_SAMPLE_LEN
 typedef struct {
     unsigned int head_master_count : HEAD_COUNTER_SIZE;
     unsigned int head_slave_count : HEAD_COUNTER_SIZE;
-    unsigned int tail : TAIL_SAMPLE_LEN;
-    unsigned int tail_count : TAIL_COUNTER_SIZE;
+    // tail sample length is the same with head
+    unsigned int tail : HEAD_SAMPLE_LEN;
 } student_state;
 
 typedef union {

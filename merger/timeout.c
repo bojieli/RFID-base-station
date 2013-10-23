@@ -52,29 +52,24 @@ static void check_timers() {
             set(students, timer->key, 0); // goto state 0
             __remove(prev_timer); // when student goes to state 0, timer should be removed
 
-            if (state.tail_count == TAIL_SAMPLE_LEN) {
-                bool head_isslave = (state.head_slave_count > state.head_master_count);
-                unsigned int tail = state.tail;
-                unsigned int tail_slave_count = 0;
-                int i;
-                for (i=0; i<TAIL_SAMPLE_LEN; i++) {
-                    tail_slave_count += tail & 1;
-                    tail >>= 1;
-                }
-                bool tail_isslave = (tail_slave_count*2 > TAIL_SAMPLE_LEN);
-                if (head_isslave != tail_isslave) {
-                    // second param:
-                    // 1 is IN (slave => master)
-                    // 0 is OUT (master => slave)
-                    notify(timer->key, head_isslave);
-                }
+            bool head_isslave = (state.head_slave_count > state.head_master_count);
+            unsigned int tail = state.tail;
+            unsigned int tail_slave_count = 0;
+            while (tail) {
+                tail_slave_count += tail & 1;
+                tail >>= 1;
             }
-            else if (state.tail_count > TAIL_SAMPLE_LEN) {
-                report_it_now("assertion failed: state.tail_count (%d) <= TAIL_SAMPLE_LEN (%d)", state.tail_count, TAIL_SAMPLE_LEN);
+            // if sequence length > HEAD_SAMPLE_LEN, then tail bits are all valid
+            // otherwise, head is exactly the same with tail, so use (head_count = head_master_count + head_slave_count) to judge tail, and it should result in not notifying
+            bool tail_isslave = (tail_slave_count*2 > state.head_master_count + state.head_slave_count);
+            if (head_isslave != tail_isslave) {
+                // second param:
+                // 1 is IN (slave => master)
+                // 0 is OUT (master => slave)
+                notify(timer->key, head_isslave);
             }
-            // otherwise sequence too short
 
-            debug("student %s timeout head_master_count %d head_slave_count %d tail %x tail_count %d", timer->key, state.head_master_count, state.head_slave_count, state.tail, state.tail_count);
+            debug("student %s timeout head_master_count %d head_slave_count %d head_count %d tail %x", timer->key, state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
         }
         prev_timer = timer;
     }
