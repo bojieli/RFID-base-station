@@ -1,4 +1,4 @@
 #!/bin/bash
 HOST="pi@shi6.com"
-rsync -a --remove-source-files --delete --exclude merger.log --exclude receiver.log /opt/gewuit/rfid/log/ $HOST:ecard-log/`viewtoken`/
+rsync -a --delete --exclude merger.log --exclude receiver.log /opt/gewuit/rfid/log/ $HOST:ecard-log/`viewtoken`/
 ssh $HOST ./log-update-trigger `viewtoken`
