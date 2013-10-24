@@ -42,8 +42,8 @@ static void check_timers() {
     // WARNING: mutex is not reentrant, so do NOT lock it again before unlock!
 
     dict prev_timer = timers;
-    while (prev_timer->next != NULL) {
-        dict timer = prev_timer->next;
+    dict timer = prev_timer->next;
+    while (timer != NULL) {
         if (curr_time - timer->value >= atoi(get_config("student.timeout"))) {
             char* student_id = strdup(timer->key); // duplicate to avoid memory violation
             state2int converter;
@@ -51,7 +51,10 @@ static void check_timers() {
             student_state state = converter.s;
 
             del(students, student_id);
-            __remove(prev_timer); // when student goes to state 0, timer should be removed
+            // timer should move forward in next loop, prev_timer not change
+            timer = timer->next;
+            // when student goes to state 0, timer should be removed
+            __remove(prev_timer);
 
             bool head_isslave = (state.head_slave_count > state.head_master_count);
             unsigned int tail = state.tail;
@@ -73,7 +76,10 @@ static void check_timers() {
             debug("student %s timeout head_master_count %d head_slave_count %d head_count %d tail %x", student_id, state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
             free(student_id);
         }
-        prev_timer = timer;
+        else { // not timeout
+            prev_timer = timer;
+            timer = timer->next;
+        }
     }
 
     pthread_mutex_unlock(&lock_timers);
