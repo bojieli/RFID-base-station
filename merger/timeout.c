@@ -49,9 +49,6 @@ static void check_timers() {
             converter.i = get(students, timer->key);
             student_state state = converter.s;
 
-            set(students, timer->key, 0); // goto state 0
-            __remove(prev_timer); // when student goes to state 0, timer should be removed
-
             bool head_isslave = (state.head_slave_count > state.head_master_count);
             unsigned int tail = state.tail;
             unsigned int tail_slave_count = 0;
@@ -70,6 +67,11 @@ static void check_timers() {
             }
 
             debug("student %s timeout head_master_count %d head_slave_count %d head_count %d tail %x", timer->key, state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
+
+            set(students, timer->key, 0); // goto state 0
+            // when student goes to state 0, timer should be removed
+            // after removal, timer->key is freed and should not be used
+            __remove(prev_timer);
         }
         prev_timer = timer;
     }
