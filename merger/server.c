@@ -8,6 +8,7 @@ static bool check_packet(unsigned char* pack) {
     return (checksum == 0);
 }
 
+// this function should not free id
 static void handle_student(char* id, bool action) {
     state2int converter;
     converter.i = get(students, id);
@@ -27,6 +28,7 @@ static void handle_student(char* id, bool action) {
     debug_verbose("student %s at %s head_master_count %d head_slave_count %d head_count %d tail %x", id, action ? "slave" : "master", state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
 }
 
+// this function should not free pack, because it is on stack
 static void handle_packet(unsigned char* pack, int action) {
     if (atoi(get_config("student.checksum_enable")) && !check_packet(pack)) {
         debug("Received invalid packet: ");
