@@ -3,14 +3,7 @@ function check_service() {
     /etc/init.d/$1 status
     if [ $? -ne 0 ]; then
         /etc/init.d/$1 start
-
-        mail -s "[ecard] service $1 check failed on `hostname`" reportitnow@gewu.me <<<EOF
-Time: `date`
-Token: `viewtoken`
-Hostname: `hostname`
-Service: $1
-Log last lines: $(tail /opt/gewuit/rfid/log/$1.log -n 50)
-        EOF
+        curl -d "action=cron_check_fail&service=$1&hostname=`hostname`&token=`viewtoken`" "http://gewu.me/ecard/reportitnow"
     fi
 }
 
