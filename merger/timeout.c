@@ -45,9 +45,13 @@ static void check_timers() {
     while (prev_timer->next != NULL) {
         dict timer = prev_timer->next;
         if (curr_time - timer->value >= atoi(get_config("student.timeout"))) {
+            char* student_id = strdup(timer->key); // duplicate to avoid memory violation
             state2int converter;
-            converter.i = get(students, timer->key);
+            converter.i = get(students, student_id);
             student_state state = converter.s;
+
+            del(students, student_id);
+            __remove(prev_timer); // when student goes to state 0, timer should be removed
 
             bool head_isslave = (state.head_slave_count > state.head_master_count);
             unsigned int tail = state.tail;
@@ -63,15 +67,11 @@ static void check_timers() {
                 // second param:
                 // 1 is IN (slave => master)
                 // 0 is OUT (master => slave)
-                notify(timer->key, head_isslave);
+                notify(student_id, head_isslave);
             }
 
-            debug("student %s timeout head_master_count %d head_slave_count %d head_count %d tail %x", timer->key, state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
-
-            set(students, timer->key, 0); // goto state 0
-            // when student goes to state 0, timer should be removed
-            // after removal, timer->key is freed and should not be used
-            __remove(prev_timer);
+            debug("student %s timeout head_master_count %d head_slave_count %d head_count %d tail %x", student_id, state.head_master_count, state.head_slave_count, state.head_master_count + state.head_slave_count, state.tail);
+            free(student_id);
         }
         prev_timer = timer;
     }
