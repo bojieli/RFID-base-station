@@ -82,6 +82,7 @@ fi
 # install init scripts
 cp $CODE_BASE/deploy/init.d/{merger,receiver} /etc/init.d/
 if [ "$ACTION" == "install" ]; then
+    rm -f /etc/rc{0,1,2,3,4,5,6,S}.d/*{merger,receiver}* # do cleanup
     if [ "$TARGET" == "master" ]; then 
         insserv -d /etc/init.d/merger # fix possible warnings
         update-rc.d merger defaults
