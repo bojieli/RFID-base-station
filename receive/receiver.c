@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     pthread_mutex_unlock(&irq_lock);
 
     cron_check_nrf_working();
-    execve(argv[0], argv); // restart self
+    execvp(argv[0], argv); // restart self
 
     // should never reach here
     return 0;
