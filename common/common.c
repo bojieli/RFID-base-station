@@ -135,7 +135,7 @@ bool report_it_now(char* format, ...) {
 }
 
 // return received bytes on success, -1 on failure
-int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
+int cloud_send(const char* remote_path, char* buf, char** recvstr) {
     char *encoded = urlencode(buf);
     int len = strlen(encoded);
     char *body = safe_malloc(len + MAX_HEADERS_LENGTH);
@@ -144,12 +144,21 @@ int cloud_send(const char* remote_path, char* buf, char** recvbuf) {
         get_config("cloud.access_token"),
         encoded);
     free(encoded);
-    int flag = http_post(get_config("cloud.remote_host"),
+    char* recvbuf = NULL;
+    int length = http_post(get_config("cloud.remote_host"),
         atoi(get_config("cloud.remote_port")),
         remote_path,
-        body, strlen(body), recvbuf);
+        body, strlen(body), &recvbuf);
     free(body);
-    return flag;
+    if (length >= 0 && recvbuf && recvstr) {
+        *recvstr = malloc(length + 1);
+        memcpy(*recvstr, recvbuf, length);
+        (*recvstr)[length] = '\0';
+    }
+    if (recvbuf) {
+        free(recvbuf);
+    }
+    return length;
 }
 
 // flush logfile every 100ms
