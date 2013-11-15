@@ -56,7 +56,7 @@ static bool try_connect(void)
     inet_aton(get_master_ip(), &server_addr.sin_addr);
     bzero(&(server_addr.sin_zero), 8);
     if (-1 == connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr))) {
-        fatal("error connecting merger");
+        fatal("error connecting merger at %s:%s", get_master_ip(), get_config("master.port"));
         close(sockfd);
         sockfd = -1; // mark it as inactive
         return false;
