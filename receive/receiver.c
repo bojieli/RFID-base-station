@@ -8,6 +8,8 @@
 static void on_irq(void);
 #include "helper.c"
 
+static bool nrf_is_working = false;
+
 // received data from nRF24l01
 static void on_irq(void)
 {
@@ -20,12 +22,26 @@ static void on_irq(void)
     pthread_mutex_unlock(&irq_lock);
 
     if (flag) {
+        nrf_is_working = true;
         add_to_queue(buf, BUF_SIZE);
         blink_led();
         if (LOG_VERBOSE())
             print_buf(buf, BUF_SIZE);
     } else {
         fatal("Receive failed on IRQ\n");
+    }
+}
+
+static void cron_check_nrf_working()
+{
+    while (true) {
+        int interval = atoi(get_config("nrf.check_working_interval"));
+        sleep(interval);
+        if (!nrf_is_working) {
+            fatal("nrf did not receive anything for %d seconds, exiting", interval);
+            exit(1);
+        }
+        nrf_is_working = false;
     }
 }
 
@@ -48,8 +64,8 @@ int main(int argc, char** argv)
     print_configs();
     pthread_mutex_unlock(&irq_lock);
 
-    // if sender finds error, exit
-    pthread_join(tid_sender, NULL);
-    fatal("sender thread exit");
+    cron_check_nrf_working();
+
+    // should never reach here
     return 0;
 }
