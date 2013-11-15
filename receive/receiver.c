@@ -39,7 +39,7 @@ static void cron_check_nrf_working()
         sleep(interval);
         if (!nrf_is_working) {
             fatal("nrf did not receive anything for %d seconds, exiting", interval);
-            exit(1);
+            return;
         }
         nrf_is_working = false;
     }
@@ -65,6 +65,7 @@ int main(int argc, char** argv)
     pthread_mutex_unlock(&irq_lock);
 
     cron_check_nrf_working();
+    execve(argv[0], argv); // restart self
 
     // should never reach here
     return 0;
