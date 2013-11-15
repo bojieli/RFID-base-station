@@ -36,6 +36,10 @@ static void cron_check_nrf_working()
 {
     while (true) {
         int interval = atoi(get_config("nrf.check_working_interval"));
+        if (interval < 1) {
+            fatal("nrf.check_working_interval must be a positive integer");
+            exit(1);
+        }
         sleep(interval);
         if (!nrf_is_working) {
             fatal("nrf did not receive anything for %d seconds, exiting", interval);
