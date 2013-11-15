@@ -86,10 +86,10 @@ static int msg_loop(int sockfd) {
             if (0 == strcmp(client_addr_str, get_local_ip()) ||
                 0 == strcmp(client_addr_str, "127.0.0.1")) {
                 fds[0].fd = newfd;
-                report_it_now("master (%s) connected", client_addr_str);
+                debug("master (%s) connected", client_addr_str);
             } else {
                 fds[1].fd = newfd;
-                report_it_now("slave (%s) connected", client_addr_str);
+                debug("slave (%s) connected", client_addr_str);
             }
             free(client_addr_str);
         }
