@@ -69,6 +69,10 @@ int main(int argc, char** argv)
     pthread_mutex_unlock(&irq_lock);
 
     cron_check_nrf_working();
+    if (logfile) {
+        fflush(logfile);
+        fclose(logfile);
+    }
     execvp(argv[0], argv); // restart self
 
     // should never reach here
