@@ -34,8 +34,8 @@ extern char *logfile_saved;
 #define debug(...) generic_debug(logfile, __VA_ARGS__)
 #define debug_stderr(...) generic_debug(stderr, __VA_ARGS__)
 
-#define fatal(format, ...) debug("FATAL: " format, ##__VA_ARGS__)
-#define fatal_stderr(format, ...) debug_stderr("FATAL: " format, ##__VA_ARGS__)
+#define fatal(format, ...) debug(("FATAL: " format), ##__VA_ARGS__)
+#define fatal_stderr(format, ...) debug_stderr(("FATAL: " format), ##__VA_ARGS__)
 
 #define LOG_VERBOSE() (atoi(get_config("debug.log_verbose")) == 1) 
 #define debug_verbose(...) if (LOG_VERBOSE()) debug(__VA_ARGS__);
