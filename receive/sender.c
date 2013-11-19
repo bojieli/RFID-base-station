@@ -30,7 +30,9 @@ static char* get_master_ip() {
     int curr = (int)time(NULL);
     if (curr - last_update > atoi(get_config("master.dynamic_ip_timeout"))) {
         char* recvbuf = NULL;
-        if (cloud_send(get_config("paths.queryip"), "master", &recvbuf) == -1) { //failed
+        // a valid IP must be >= 7 chars (e.g. 1.1.1.1)
+        // -1 for HTTP request failure
+        if (cloud_send(get_config("paths.queryip"), "master", &recvbuf) < 7) { //failed
             if (recvbuf != NULL)
                 free(recvbuf);
         } else { //success
