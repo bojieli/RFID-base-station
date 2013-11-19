@@ -26,16 +26,17 @@ extern char *logfile_saved;
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 // This macro is not thread-safe.
-#define generic_debug(outfd, format, ...) { \
-    fprintf(outfd, "[%s] %s:%d\t", print_time(), __FILENAME__, __LINE__); \
-    fprintf(outfd, (format), ##__VA_ARGS__); \
-    fprintf(outfd, "\n"); \
+#define generic_debug(outfd, prepend_text, ...) { \
+    fprintf((outfd), "[%s] %s:%d\t", print_time(), __FILENAME__, __LINE__); \
+    fprintf((outfd), "%s", (prepend_text)); \
+    fprintf((outfd), __VA_ARGS__); \
+    fprintf((outfd), "\n"); \
 }
-#define debug(...) generic_debug(logfile, __VA_ARGS__)
-#define debug_stderr(...) generic_debug(stderr, __VA_ARGS__)
+#define debug(...) generic_debug(logfile, "", __VA_ARGS__)
+#define debug_stderr(...) generic_debug(stderr, "", __VA_ARGS__)
 
-#define fatal(format, ...) debug(("FATAL: " format), ##__VA_ARGS__)
-#define fatal_stderr(format, ...) debug_stderr(("FATAL: " format), ##__VA_ARGS__)
+#define fatal(...) generic_debug(logfile, "FATAL: ", __VA_ARGS__)
+#define fatal_stderr(...) generic_debug(stderr, "FATAL: ", __VA_ARGS__)
 
 #define LOG_VERBOSE() (atoi(get_config("debug.log_verbose")) == 1) 
 #define debug_verbose(...) if (LOG_VERBOSE()) debug(__VA_ARGS__);
