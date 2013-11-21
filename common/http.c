@@ -48,7 +48,7 @@ int sendn(int fd, void* buf, size_t size) {
 int http_post(const char* remote_host, int remote_port, const char* remote_path, char* body, size_t len, char** recvbuf) {
     ASSERT(recvbuf != NULL)
 
-#define MY_IF_ERROR(exp, msg) if (-1 == (exp)) { debug(msg); goto out; }
+#define MY_IF_ERROR(exp, msg) if (-1 == (exp)) { debug("assertion failed: %s (errno %d)", (msg), errno); goto out; }
 
     // dynamically allocated
     char *tcp = NULL;
