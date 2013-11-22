@@ -36,6 +36,8 @@ static char* get_master_ip() {
             if (recvbuf != NULL)
                 free(recvbuf);
         } else { //success
+            if (ip)
+                free(ip);
             ip = recvbuf;
         }
         last_update = curr;
@@ -45,6 +47,7 @@ static char* get_master_ip() {
 
 static bool try_connect(void)
 {
+    ASSERT(sockfd == -1);
     struct sockaddr_in server_addr;
     IF_ERROR(sockfd = socket(AF_INET, SOCK_STREAM, 0), "create socket")
 

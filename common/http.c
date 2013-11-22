@@ -60,7 +60,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
     unsigned int start_time = (unsigned int)time(NULL);
 
     struct sockaddr_in server_addr;
-    int sockfd;
+    int sockfd = -1;
     MY_IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     struct timeval timeout = {.tv_sec = atoi(get_config("http.timeout")), .tv_usec = 0};
     MY_IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)), "set recv timeout")
@@ -140,7 +140,8 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 out:
     if (tcp != NULL)
         free(tcp);
-    close(sockfd);
+    if (sockfd > 0)
+        close(sockfd);
     debug("HTTP connection %s, %d bytes received, remote path %s", (isok ? "OK" : "failed"), totalbytes, remote_path);
     return totalbytes;
 }
