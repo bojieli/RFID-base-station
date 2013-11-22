@@ -17,7 +17,7 @@ int sockfd;
 static int init_send()
 {
     struct sockaddr_in server_addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
     if (sockfd == -1) {
         printf("error creating socket\n");
         return 1;

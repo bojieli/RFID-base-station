@@ -32,7 +32,7 @@ static void nextline() {
     static int buflen = 0;
 
     if (log == NULL) {
-        log = fopen(LOGFILE, "r");
+        log = fopen(LOGFILE, "re");
         if (log == NULL) {
             warn_log_deleted();
             return;

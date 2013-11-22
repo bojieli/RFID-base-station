@@ -71,8 +71,8 @@ int main(int argc, char** argv)
     cron_check_nrf_working();
     if (logfile) {
         fflush(logfile);
-        fclose(logfile);
     }
+    // all files should have been opened with O_CLOEXEC flag
     execvp(argv[0], argv); // restart self
 
     // should never reach here
