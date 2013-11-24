@@ -22,9 +22,9 @@ static void on_irq(void)
 
     if (flag) {
         blink_led();
-        printf("station %3d ID ", station);
-        print_buf(buf, BUF_SIZE);
-        printf("\n");
+        char* str = sprint_buf(buf, BUF_SIZE);
+        debug("station %3d received ID %s", station, str);
+        free(str);
     } else {
         printf("Receive failed on IRQ\n");
     }
@@ -42,9 +42,7 @@ int main(int argc, char** argv)
 
     for (station=0; station<128; station++) {
         init_NRF24L01(station & 0x7F);
-        pthread_mutex_lock(&irq_lock);
-        print_configs();
-        pthread_mutex_unlock(&irq_lock);
+        debug("probing station %d", station);
         sleep(10);
     }
 

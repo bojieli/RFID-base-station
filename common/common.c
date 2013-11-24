@@ -36,18 +36,21 @@ int hex2int(char c) {
 
 void print_buf(uchar* buf, int len)
 {
-    char *str = safe_malloc(len * 3);
+    char *str = sprint_buf(buf, len);
+    debug("Received ID: %s", str);
+    free(str);
+}
+
+char* sprint_buf(uchar* buf, int len)
+{
+    char *str = safe_malloc(len * 2 + 1);
     int i;
     for (i=0; i<len; i++) {
-        str[i*3 + 0] = tohexchar(buf[i] >> 4);
-        str[i*3 + 1] = tohexchar(buf[i] & 15);
-        str[i*3 + 2] = ' ';
+        str[i*2 + 0] = tohexchar(buf[i] >> 4);
+        str[i*2 + 1] = tohexchar(buf[i] & 15);
     }
-    str[len*3 - 1] = '\0';
-
-    debug("received ID: %s", str);
-
-    free(str);
+    str[len*2] = '\0';
+    return str;
 }
 
 static void sighup_action(int signo) {

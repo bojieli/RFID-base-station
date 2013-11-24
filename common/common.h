@@ -81,6 +81,7 @@ char* print_time(void);
 char tohexchar(int n);
 int hex2int(char c);
 void print_buf(uchar* buf, int len);
+char* sprint_buf(uchar* buf, int len);
 void init_sigactions(void);
 void init_params(int argc, char** argv);
 bool report_it_now(char* format, ...);
