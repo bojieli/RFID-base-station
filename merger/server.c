@@ -85,9 +85,13 @@ static int msg_loop(int sockfd) {
             char* client_addr_str = strdup(inet_ntoa(client_addr.sin_addr));
             if (0 == strcmp(client_addr_str, get_local_ip()) ||
                 0 == strcmp(client_addr_str, "127.0.0.1")) {
+                if (fds[0].fd != -1)
+                    close(fds[0].fd);
                 fds[0].fd = newfd;
                 fatal("master (%s) connected", client_addr_str);
             } else {
+                if (fds[1].fd != -1)
+                    close(fds[1].fd);
                 fds[1].fd = newfd;
                 fatal("slave (%s) connected", client_addr_str);
             }
