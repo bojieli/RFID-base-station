@@ -18,6 +18,8 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <fcntl.h>
+#include <limits.h>
 
 extern FILE *logfile;
 extern char *logfile_saved;
@@ -80,6 +82,8 @@ void init_params(int argc, char** argv);
 bool report_it_now(char* format, ...);
 int cloud_send(const char* remote_path, char* buf, char** recvbuf);
 void cron_logflush(void);
+void close_fds(bool close_std, ...);
+void close_all_fds(void);
 
 // dict.c
 typedef struct dict_item {

@@ -71,8 +71,8 @@ int main(int argc, char** argv)
     cron_check_nrf_working();
     if (logfile) {
         fflush(logfile);
-        fclose(logfile);
     }
+    close_all_fds();
     execvp(argv[0], argv); // restart self
 
     // should never reach here
