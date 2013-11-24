@@ -21,6 +21,10 @@
 #include <fcntl.h>
 #include <limits.h>
 
+#ifndef NR_OPEN
+#define NR_OPEN 1024
+#endif
+
 extern FILE *logfile;
 extern char *logfile_saved;
 
