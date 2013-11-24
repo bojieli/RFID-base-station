@@ -105,10 +105,11 @@ static int msg_loop(int sockfd) {
                 int readlen = recvn(fds[i].fd, buf, PACKET_SIZE);
                 if (readlen == -1) {
                     fatal("read from %s", i ? "slave" : "master");
-                    return -1;
+                    goto err;
                 }
                 if (readlen < PACKET_SIZE) {
                     fatal(i ? "slave exit" : "master exit");
+                    close(fds[i].fd);
                     fds[i].fd = -1;
                     continue;
                 }
@@ -130,6 +131,13 @@ static int msg_loop(int sockfd) {
             }
         }
     }
+err: {
+    int i;
+    for (i=0; i<=2; i++)
+        if (fds[i].fd != -1)
+            close(fds[i].fd);
+    return -1;
+     }
 }
 
 int init_server()
