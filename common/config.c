@@ -85,7 +85,7 @@ readvalue:
 
 bool load_config(const char* config_file)
 {
-    fp = fopen(config_file, "re");
+    fp = fopen(config_file, "r");
     if (fp == NULL) {
         fatal("Cannot open config file %s", config_file);
         return false;
@@ -98,7 +98,7 @@ bool reload_configs()
 {
     if (saved_conf_file == NULL)
         return false;
-    fp = fopen(saved_conf_file, "re");
+    fp = fopen(saved_conf_file, "r");
     if (fp == NULL) {
         fatal("Cannot open config file %s", saved_conf_file);
         return false;

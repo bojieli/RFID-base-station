@@ -61,7 +61,7 @@ int http_post(const char* remote_host, int remote_port, const char* remote_path,
 
     struct sockaddr_in server_addr;
     int sockfd = -1;
-    MY_IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0)), "socket")
+    MY_IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     struct timeval timeout = {.tv_sec = atoi(get_config("http.timeout")), .tv_usec = 0};
     MY_IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)), "set recv timeout")
     MY_IF_ERROR(setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)), "set send timeout")

@@ -49,7 +49,7 @@ static bool try_connect(void)
 {
     ASSERT(sockfd == -1);
     struct sockaddr_in server_addr;
-    IF_ERROR(sockfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0), "create socket")
+    IF_ERROR(sockfd = socket(AF_INET, SOCK_STREAM, 0), "create socket")
 
     unsigned int timeout_ms = atoi(get_config("master.send_timeout"));
     struct timeval timeout = {.tv_sec = timeout_ms / 1000, .tv_usec = (timeout_ms % 1000) * 1000};

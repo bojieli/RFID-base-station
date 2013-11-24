@@ -51,7 +51,7 @@ static char* get_local_ip() {
     int fd;
     struct ifreq ifr;
    
-    fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
     ioctl(fd, SIOCGIFADDR, &ifr);
@@ -134,7 +134,7 @@ int init_server()
 
     int sockfd;
     struct sockaddr_in myaddr;
-    IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0)), "socket")
+    IF_ERROR((sockfd = socket(AF_INET, SOCK_STREAM, 0)), "socket")
     myaddr.sin_family = AF_INET;
     myaddr.sin_port = htons(atoi(get_config("listen.port")));
     myaddr.sin_addr.s_addr = inet_addr(get_config("listen.host"));

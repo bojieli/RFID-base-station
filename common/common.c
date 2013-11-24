@@ -62,7 +62,7 @@ static void sigusr1_action(int signo) {
     debug("caught signal SIGUSR1");
     if (logfile_saved) {
         FILE *fp;
-        fp = fopen(logfile_saved, "ae");
+        fp = fopen(logfile_saved, "a");
         if (fp) {
             debug("this logfile is going to be logrotated");
             fclose(logfile);
@@ -103,7 +103,7 @@ void init_params(int argc, char** argv)
         fatal_stderr("Usage: %s <config-file> [<log-file>]", argv[0]);
         exit(1);
     }
-    logfile = (argc == 3 ? fopen(argv[2], "ae") : stderr);
+    logfile = (argc == 3 ? fopen(argv[2], "a") : stderr);
     if (logfile == NULL) {
         fatal_stderr("Cannot open logfile");
         exit(1);
