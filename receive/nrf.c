@@ -192,6 +192,8 @@ static void _switch_channels(bool bitmap[CHANNEL_MAX], int usec)
 
 void cron_channel_switch(void)
 {
+    int prev_num_channels = 0;
+    int prev_last_channel = -1;
     while (true) {
         int usec = atoi(get_config("nrf.channel_switch_interval"));
         if (usec < 10000) // do not allow switch faster than 10ms
@@ -201,6 +203,8 @@ void cron_channel_switch(void)
         bool bitmap[CHANNEL_MAX] = {0};
         int curr = 0;
         bool isempty = true;
+        int num_channels = 0;
+        int last_channel = -1;
         while (true) {
             if (*channels >= '0' && *channels <= '9') {
                 isempty = false;
@@ -209,8 +213,11 @@ void cron_channel_switch(void)
                     fatal("invalid channel %d in config", curr);
             }
             else { // separator between channels
-                if (!isempty && curr >= 0 && curr < CHANNEL_MAX)
+                if (!isempty && curr >= 0 && curr < CHANNEL_MAX) {
                     bitmap[curr] = true;
+                    ++num_channels;
+                    last_channel = curr;
+                }
                 curr = 0;
                 isempty = true;
                 if (*channels == '\0')
@@ -219,6 +226,17 @@ void cron_channel_switch(void)
             ++channels;
         }
 
-        _switch_channels(bitmap, usec);
+        if (num_channels == 0) {
+            fatal("no available channels");
+            usleep(usec);
+        }
+        else if (num_channels == 1 && prev_num_channels == 1 && last_channel == prev_last_channel) {
+            // only one channel and stay the same, no need to switch channel
+        }
+        else {
+            _switch_channels(bitmap, usec);
+        }
+        prev_num_channels = num_channels;
+        prev_last_channel = last_channel;
     }
 }
