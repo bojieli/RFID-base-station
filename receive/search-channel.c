@@ -30,11 +30,10 @@ static void on_irq(void)
     }
 }
 
-#define CONFIG_FILE "../config/receiver.ini"
 int main(int argc, char** argv)
 {
-    logfile = stderr; 
-    if (!load_config(CONFIG_FILE)) {
+    logfile = stderr;
+    if (argc < 2 || !load_config(argv[1])) {
         fatal("error parsing config file");
         exit(1);
     }
