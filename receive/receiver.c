@@ -55,18 +55,10 @@ int main(int argc, char** argv)
     common_init();
 
     pthread_mutex_init(&lock_sender, NULL);
-    pthread_t tid_sender, tid_logflusher;
+    pthread_t tid_sender, tid_logflusher, tid_channel_switcher;
     pthread_create(&tid_sender, NULL, (void * (*)(void *))&cron_send, NULL);
     pthread_create(&tid_logflusher, NULL, (void * (*)(void *))&cron_logflush, NULL);
-
-    int station = atoi(get_config("nrf.channel"));
-    init_NRF24L01(station & 0x7F); // maximum 127 channels
-
-    debug("Initialized channel %d\n", station);
-    
-    pthread_mutex_lock(&irq_lock);
-    print_configs();
-    pthread_mutex_unlock(&irq_lock);
+    pthread_create(&tid_channel_switcher, NULL, (void * (*)(void *))&cron_channel_switch, NULL);
 
     cron_check_nrf_working();
     if (logfile) {

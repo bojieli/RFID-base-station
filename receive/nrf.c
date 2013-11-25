@@ -175,3 +175,50 @@ void print_configs()
     fflush(stdout);
     CE(1);
 }
+
+#define CHANNEL_MAX 256
+
+static void _switch_channels(bool bitmap[CHANNEL_MAX], int usec)
+{
+    int channel;
+    for (channel = 0; channel < CHANNEL_MAX; channel++) {
+        if (bitmap[channel]) {
+            init_NRF24L01(channel);
+            debug("Initialized channel %d", channel);
+            usleep(usec);
+        }
+    }
+}
+
+void cron_channel_switch(void)
+{
+    while (true) {
+        int usec = atoi(get_config("nrf.channel_switch_interval"));
+        if (usec < 10000) // do not allow switch faster than 10ms
+            usec = 10000;
+
+        char* channels = get_config("nrf.channel");
+        bool bitmap[CHANNEL_MAX] = {0};
+        int curr = 0;
+        bool isempty = true;
+        while (true) {
+            if (*channels >= '0' && *channels <= '9') {
+                isempty = false;
+                curr = curr * 10 + (*channels - '0');
+                if (curr >= CHANNEL_MAX)
+                    fatal("invalid channel %d in config", curr);
+            }
+            else { // separator between channels
+                if (!isempty && curr >= 0 && curr < CHANNEL_MAX)
+                    bitmap[curr] = true;
+                curr = 0;
+                isempty = true;
+                if (*channels == '\0')
+                    break;
+            }
+            ++channels;
+        }
+
+        _switch_channels(bitmap, usec);
+    }
+}

@@ -56,5 +56,6 @@ void nRF24L01_TxPacket(uchar* buf);
 void SetRX_Mode(void);
 void init_NRF24L01(uchar station);
 void print_configs(void);
+void cron_channel_switch(void);
 
 #endif
