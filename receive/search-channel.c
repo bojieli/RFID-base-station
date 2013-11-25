@@ -46,7 +46,7 @@ int main(int argc, char** argv)
         sleep(10);
     }
 
-    close_all_fds();
+    close_fds(0, -1); // close all fds except 0-2
     execvp(argv[0], argv);
     return 0;
 }
