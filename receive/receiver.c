@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     if (logfile) {
         fflush(logfile);
     }
-    close_all_fds();
+    close_fds(0, -1); // close all fds except 0-2
     execvp(argv[0], argv); // restart self
 
     // should never reach here
