@@ -75,10 +75,11 @@ static bool do_send(void) {
     static unsigned char *sendbuf;
     static int sendlen;
 
+    int packet_size = 1 + atoi(get_config("nrf.PX_PLOAD_WIDTH"));
     if (lastok) {
         pthread_mutex_lock(&lock_sender);
         if (send_queue_len == 0) { // send heartbeat with all bytes zero
-            sendlen = atoi(get_config("nrf.RX_PLOAD_WIDTH"));
+            sendlen = packet_size;
             sendbuf = safe_malloc(sendlen);
             bzero(sendbuf, sendlen);
         } else { // send normal data
@@ -89,8 +90,8 @@ static bool do_send(void) {
         }
         pthread_mutex_unlock(&lock_sender);
 
-        if (sendlen > atoi(get_config("master.warn_queue_len"))) {
-            report_it_now("receiver queue too long (%d bytes, %d packets)", sendlen, sendlen / atoi(get_config("master.heartbeat_packlen")));
+        if (sendlen > packet_size * atoi(get_config("master.warn_queue_len"))) {
+            report_it_now("receiver queue too long (%d bytes, %d packets)", sendlen, sendlen / packet_size);
         }
     }
 

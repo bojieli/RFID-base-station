@@ -16,17 +16,18 @@ static void on_irq(void)
     if (0 != pthread_mutex_trylock(&irq_lock))
         return;
 
-    uchar buf[BUF_SIZE];
-    int flag = nRF24L01_RxPacket(buf);
+    // first byte is channel number
+    uchar buf[1 + BUF_SIZE] = {current_channel};
+    int flag = nRF24L01_RxPacket(buf + 1);
 
     pthread_mutex_unlock(&irq_lock);
 
     if (flag) {
         nrf_is_working = true;
-        add_to_queue(buf, BUF_SIZE);
+        add_to_queue(buf, 1 + BUF_SIZE);
         blink_led();
         if (LOG_VERBOSE())
-            print_buf(buf, BUF_SIZE);
+            print_buf(buf, 1 + BUF_SIZE);
     } else {
         fatal("Receive failed on IRQ\n");
     }

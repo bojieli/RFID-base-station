@@ -1,6 +1,7 @@
 #include "nrf.h"
 
 static uchar station_R, station_T;
+uchar current_channel = 0;
 
 int TX_PLOAD_WIDTH, RX_PLOAD_WIDTH;
 int TX_ADR_WIDTH, RX_ADR_WIDTH;
@@ -183,6 +184,7 @@ static void _switch_channels(bool bitmap[CHANNEL_MAX], int usec)
     int channel;
     for (channel = 0; channel < CHANNEL_MAX; channel++) {
         if (bitmap[channel]) {
+            current_channel = channel;
             init_NRF24L01(channel);
             debug("Initialized channel %d", channel);
             usleep(usec);
