@@ -17,7 +17,8 @@ static void on_irq(void)
         return;
 
     // first byte is channel number
-    uchar buf[1 + BUF_SIZE] = {current_channel};
+    uchar buf[1 + BUF_SIZE];
+    buf[0] = current_channel;
     int flag = nRF24L01_RxPacket(buf + 1);
 
     pthread_mutex_unlock(&irq_lock);
