@@ -75,7 +75,7 @@ static bool do_send(void) {
     static unsigned char *sendbuf;
     static int sendlen;
 
-    int packet_size = 1 + atoi(get_config("nrf.PX_PLOAD_WIDTH"));
+    int packet_size = 1 + atoi(get_config("nrf.RX_PLOAD_WIDTH"));
     if (lastok) {
         pthread_mutex_lock(&lock_sender);
         if (send_queue_len == 0) { // send heartbeat with all bytes zero
